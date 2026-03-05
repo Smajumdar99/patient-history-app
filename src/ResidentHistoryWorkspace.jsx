@@ -1,5 +1,18 @@
 import { useState, useEffect, useRef } from 'react';
-import { ChevronRight, Pencil, Check, X, Search, Calendar, ChevronDown } from 'lucide-react';
+import {
+  Pencil,
+  Check,
+  X,
+  Search,
+  Calendar,
+  ChevronDown,
+  User,
+  Activity,
+  Users,
+  Contact,
+  Coffee,
+  MoreHorizontal,
+} from 'lucide-react';
 
 const TABS = [
   'General',
@@ -9,6 +22,8 @@ const TABS = [
   'Lifestyle',
   'Other',
 ];
+
+const TAB_ICONS = [User, Activity, Users, Contact, Coffee, MoreHorizontal];
 
 const INITIAL_MOCK_DATA = {
   general: {
@@ -131,16 +146,8 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
     }));
   };
 
-  const goPrevious = () => {
-    setActiveTab((t) => (t > 0 ? t - 1 : t));
-  };
-
-  const goNext = () => {
-    setActiveTab((t) => (t < TABS.length - 1 ? t + 1 : t));
-  };
-
   const FieldLabel = ({ children }) => (
-    <div className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1">
+    <div className="text-xs font-bold text-slate-500 tracking-wider mb-1">
       {children}
     </div>
   );
@@ -151,7 +158,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
 
   const cardContent = (
     <div
-      className={`w-full bg-white rounded-lg border border-slate-200 shadow-sm overflow-hidden flex flex-col ${
+      className={`w-full bg-white border border-slate-200 rounded-lg overflow-hidden flex flex-col ${
         embedded ? 'flex-1 min-h-0' : 'max-w-6xl min-h-[calc(100vh-3rem)]'
       }`}
     >
@@ -159,12 +166,13 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
         <div className="flex flex-1 min-h-0">
           {/* Left stepper */}
           <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-6 pl-4 pr-2">
-            <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-4 px-2">
+            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-4 px-2">
               Sections
             </h2>
             <ul className="space-y-0.5">
               {TABS.map((label, index) => {
                 const isActive = activeTab === index;
+                const Icon = TAB_ICONS[index];
                 return (
                   <li key={label}>
                     <button
@@ -176,17 +184,12 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                           : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
                       }`}
                     >
-                      <span
-                        className={`flex shrink-0 w-5 h-5 rounded-full items-center justify-center ${
-                          isActive ? 'bg-[#0056B3]' : 'bg-slate-200'
+                      <Icon
+                        size={20}
+                        className={`shrink-0 w-5 h-5 ${
+                          isActive ? 'text-[#004E8C]' : 'text-slate-400'
                         }`}
-                      >
-                        <span
-                          className={`w-1.5 h-1.5 rounded-full ${
-                            isActive ? 'bg-white' : 'bg-slate-400'
-                          }`}
-                        />
-                      </span>
+                      />
                       <span
                         className={`text-sm truncate ${
                           isActive ? 'font-semibold' : 'font-normal'
@@ -201,9 +204,9 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
             </ul>
           </nav>
 
-          {/* Right content card */}
+          {/* Right content area */}
           <div className="flex-1 min-w-0 flex flex-col p-6">
-            <div className="bg-white rounded-lg border border-slate-200 p-6 flex-1 min-h-0 overflow-auto">
+            <div className="bg-white p-6 flex-1 min-h-0 overflow-auto">
               {/* Card header with Edit button */}
               <div className="flex items-center justify-between mb-6">
                 <h1 className="text-xl font-bold text-slate-900">
@@ -285,37 +288,25 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
         </div>
 
         {/* Footer action bar - fixed at bottom of workspace card */}
-        <footer className="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-between">
+        <footer className="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-end">
           {!isEditMode ? (
-            <>
+            <div className="flex items-center gap-3">
               <button
                 type="button"
-                onClick={goPrevious}
-                disabled={activeTab === 0}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                onClick={handleCancel}
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
               >
-                Previous
+                Cancel
               </button>
-              <div className="flex items-center gap-3">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
-                >
-                  Save & Exit
-                </button>
-                <button
-                  type="button"
-                  onClick={goNext}
-                  disabled={activeTab === TABS.length - 1}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-[#0056B3] rounded-md hover:bg-[#004494] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-[#FFFFFF]"
-                >
-                  Next Step
-                  <ChevronRight className="w-4 h-4 text-[#FFFFFF]" />
-                </button>
-              </div>
-            </>
+              <button
+                type="button"
+                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
+              >
+                Save & Exit
+              </button>
+            </div>
           ) : (
-            <>
+            <div className="flex items-center gap-3">
               <button
                 type="button"
                 onClick={handleCancel}
@@ -331,7 +322,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                 <Check className="w-4 h-4" />
                 Save Changes
               </button>
-            </>
+            </div>
           )}
         </footer>
     </div>
@@ -365,7 +356,7 @@ const EXAM_STATUS_OPTIONS = ['N/A', 'Normal', 'Abnormal'];
 function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   const inputClass =
     'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm';
-  const sectionLabelClass = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2 block';
+  const sectionLabelClass = 'text-[11px] font-bold text-slate-400 tracking-wider mb-2 block';
 
   const riskFactorsSelected = data.riskFactorsSelected || [];
   const toggleRiskFactor = (name) => {
@@ -385,9 +376,9 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
 
   return (
     <div className="space-y-8">
-      {/* RISK FACTORS */}
+      {/* Risk Factors */}
       <section>
-        <span className={sectionLabelClass}>RISK FACTORS</span>
+        <span className={sectionLabelClass}>Risk Factors</span>
         {!isEditMode ? (
           <p className="text-sm text-slate-800">
             {riskFactorsSelected.length > 0
@@ -417,9 +408,9 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
         )}
       </section>
 
-      {/* EXAMS / TESTS */}
+      {/* Exams / Tests */}
       <section>
-        <span className={sectionLabelClass}>EXAMS / TESTS</span>
+        <span className={sectionLabelClass}>Exams / Tests</span>
         {!isEditMode ? (
           <p className="text-sm text-slate-800">{data.examsSummary || ''}</p>
         ) : (
@@ -427,13 +418,13 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-slate-50 border-b border-slate-200">
-                  <th className="text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2.5 px-3">
+                  <th className="text-left text-[11px] font-bold text-slate-500 tracking-wider py-2.5 px-3">
                     Exam Name
                   </th>
-                  <th className="text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2.5 px-3">
+                  <th className="text-left text-[11px] font-bold text-slate-500 tracking-wider py-2.5 px-3">
                     Status
                   </th>
-                  <th className="text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider py-2.5 px-3">
+                  <th className="text-left text-[11px] font-bold text-slate-500 tracking-wider py-2.5 px-3">
                     Date / Notes
                   </th>
                 </tr>
@@ -484,9 +475,9 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
         )}
       </section>
 
-      {/* SPECIFY OTHER */}
+      {/* Specify Other */}
       <section>
-        <span className={sectionLabelClass}>SPECIFY OTHER</span>
+        <span className={sectionLabelClass}>Specify Other</span>
         {!isEditMode ? (
           <p className="text-sm text-slate-800">{data.otherSpecify || 'None'}</p>
         ) : (
@@ -717,7 +708,7 @@ function FamilyHistoryTab({
 
   const inputClass =
     'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
-  const labelClass = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block';
+  const labelClass = 'text-[11px] font-bold text-slate-400 tracking-wider mb-1 block';
 
   const DiagnosisChips = ({ diagnoses, field }) => (
     <div className="flex flex-wrap gap-2">
@@ -798,7 +789,7 @@ function FamilyHistoryTab({
       {/* Row: Siblings */}
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         <div>
-          <label className={labelClass}>SIBLINGS</label>
+          <label className={labelClass}>Siblings</label>
           {isEditMode ? (
             <input
               type="text"
@@ -839,7 +830,7 @@ function FamilyHistoryTab({
       {/* Row: Spouse */}
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         <div>
-          <label className={labelClass}>SPOUSE</label>
+          <label className={labelClass}>Spouse</label>
           {isEditMode ? (
             <input
               type="text"
@@ -880,7 +871,7 @@ function FamilyHistoryTab({
       {/* Row: Offspring */}
       <div className="grid grid-cols-2 gap-x-8 gap-y-4">
         <div>
-          <label className={labelClass}>OFFSPRING</label>
+          <label className={labelClass}>Offspring</label>
           {isEditMode ? (
             <input
               type="text"
@@ -961,9 +952,9 @@ function RelativesTab({
   );
 }
 
-const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-3 block';
-const LIFESTYLE_GRID_HEADER = 'text-[11px] font-bold uppercase tracking-wider text-slate-400';
-const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold uppercase tracking-wider text-slate-400 mb-1 block';
+const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold tracking-wider text-slate-400 mb-3 block';
+const LIFESTYLE_GRID_HEADER = 'text-[11px] font-bold tracking-wider text-slate-400';
+const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold tracking-wider text-slate-400 mb-1 block';
 const LIFESTYLE_INPUT =
   'border border-slate-300 rounded-md px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none w-full';
 const LIFESTYLE_GRID = 'grid gap-x-4 gap-y-4 items-center';
@@ -999,7 +990,7 @@ function LifestyleTab({
 
   const DateInput = ({ value, onChange, label }) => (
     <div className="flex flex-col gap-0.5 min-w-0">
-      {label && <span className="text-[11px] text-slate-500 uppercase">{label}</span>}
+      {label && <span className="text-[11px] text-slate-500">{label}</span>}
       <div className="relative flex items-center">
         <Calendar className="absolute left-2.5 w-4 h-4 text-slate-400 pointer-events-none shrink-0" />
         <input
@@ -1025,10 +1016,10 @@ function LifestyleTab({
         /* View Mode: 2-column grid, no table headers */
         <>
           <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>SUBSTANCE USE HISTORY</h3>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Substance Use History</h3>
             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>TOBACCO</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Tobacco</span>
                 <FieldValue>
                   {[data.tobaccoStatus, data.tobaccoAmount].filter(Boolean).length
                     ? `${data.tobaccoStatus || ''}${data.tobaccoAmount ? ` - ${data.tobaccoAmount}` : ''}${data.tobaccoEnd ? ` (Ended ${data.tobaccoEnd})` : ''}`.trim() || '—'
@@ -1036,7 +1027,7 @@ function LifestyleTab({
                 </FieldValue>
               </div>
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>ALCOHOL</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Alcohol</span>
                 <FieldValue>
                   {[data.alcoholStatus, data.alcoholDetails].filter(Boolean).length
                     ? `${data.alcoholStatus || ''}${data.alcoholDetails ? ` - ${data.alcoholDetails}` : ''}`.trim() || '—'
@@ -1044,7 +1035,7 @@ function LifestyleTab({
                 </FieldValue>
               </div>
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>RECREATIONAL DRUGS</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Recreational Drugs</span>
                 <FieldValue>
                   {[data.recreationalStatus, data.recreationalDetails].filter(Boolean).length
                     ? `${data.recreationalStatus || ''}${data.recreationalDetails ? ` - ${data.recreationalDetails}` : ''}`.trim() || '—'
@@ -1052,7 +1043,7 @@ function LifestyleTab({
                 </FieldValue>
               </div>
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>COFFEE</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Coffee</span>
                 <FieldValue>
                   {[data.coffeeStatus, data.coffeeDetails].filter(Boolean).length
                     ? `${data.coffeeStatus || ''}${data.coffeeDetails ? ` - ${data.coffeeDetails}` : ''}`.trim() || '—'
@@ -1062,10 +1053,10 @@ function LifestyleTab({
             </div>
           </section>
           <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>WELLNESS & BEHAVIORAL PATTERNS</h3>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Wellness & Behavioral Patterns</h3>
             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>COUNSELING</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Counseling</span>
                 <FieldValue>
                   {[data.counselingStatus, data.counselingDetails].filter(Boolean).length
                     ? `${data.counselingStatus || ''}${data.counselingDetails ? ` - ${data.counselingDetails}` : ''}`.trim() || '—'
@@ -1073,7 +1064,7 @@ function LifestyleTab({
                 </FieldValue>
               </div>
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>EXERCISE PATTERNS</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Exercise Patterns</span>
                 <FieldValue>
                   {[data.exerciseStatus, data.exerciseDetails].filter(Boolean).length
                     ? `${data.exerciseStatus || ''}${data.exerciseDetails ? ` - ${data.exerciseDetails}` : ''}`.trim() || '—'
@@ -1081,20 +1072,20 @@ function LifestyleTab({
                 </FieldValue>
               </div>
               <div>
-                <span className={LIFESTYLE_VIEW_LABEL}>HAZARDOUS ACTIVITIES</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Hazardous Activities</span>
                 <FieldValue>{data.hazardousStatus || '—'}</FieldValue>
               </div>
             </div>
           </section>
           <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>OTHER FACTORS</h3>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Other Factors</h3>
             <div className="grid grid-cols-2 gap-x-12 gap-y-6">
               <div className="col-span-2">
-                <span className={LIFESTYLE_VIEW_LABEL}>SLEEP PATTERNS</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Sleep Patterns</span>
                 <FieldValue>{data.sleepPatterns || '—'}</FieldValue>
               </div>
               <div className="col-span-2">
-                <span className={LIFESTYLE_VIEW_LABEL}>SEATBELT USE</span>
+                <span className={LIFESTYLE_VIEW_LABEL}>Seatbelt Use</span>
                 <FieldValue>{data.seatbeltUse || '—'}</FieldValue>
               </div>
             </div>
@@ -1103,14 +1094,14 @@ function LifestyleTab({
       ) : (
         /* Edit Mode: 4-column grid unchanged */
         <>
-          {/* Section 1: SUBSTANCE USE HISTORY */}
-          <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>SUBSTANCE USE HISTORY</h3>
-            <div className={`${LIFESTYLE_GRID} ${LIFESTYLE_GRID_COLS}`}>
-              <div className={LIFESTYLE_GRID_HEADER}>SUBSTANCE</div>
-              <div className={LIFESTYLE_GRID_HEADER}>DETAILS / FREQUENCY</div>
-              <div className={LIFESTYLE_GRID_HEADER}>STATUS</div>
-              <div className={LIFESTYLE_GRID_HEADER}>DATE RANGE</div>
+          {/* Section 1: Substance Use History */}
+      <section>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Substance Use History</h3>
+        <div className={`${LIFESTYLE_GRID} ${LIFESTYLE_GRID_COLS}`}>
+              <div className={LIFESTYLE_GRID_HEADER}>Substance</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Details / Frequency</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Status</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Date Range</div>
 
               <div className="text-sm font-medium text-slate-700">Tobacco</div>
               <input
@@ -1178,14 +1169,14 @@ function LifestyleTab({
             </div>
           </section>
 
-          {/* Section 2: WELLNESS & BEHAVIORAL PATTERNS */}
+          {/* Section 2: Wellness & Behavioral Patterns */}
           <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>WELLNESS & BEHAVIORAL PATTERNS</h3>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Wellness & Behavioral Patterns</h3>
             <div className={`${LIFESTYLE_GRID} ${LIFESTYLE_GRID_COLS}`}>
-              <div className={LIFESTYLE_GRID_HEADER}>ACTIVITY</div>
-              <div className={LIFESTYLE_GRID_HEADER}>DESCRIPTION / NOTES</div>
-              <div className={LIFESTYLE_GRID_HEADER}>STATUS</div>
-              <div className={LIFESTYLE_GRID_HEADER}>DATE RANGE</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Activity</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Description / Notes</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Status</div>
+              <div className={LIFESTYLE_GRID_HEADER}>Date Range</div>
 
               <div className="text-sm font-medium text-slate-700">Counseling</div>
               <input
@@ -1228,9 +1219,9 @@ function LifestyleTab({
             </div>
           </section>
 
-          {/* Section 3: OTHER FACTORS */}
+          {/* Section 3: Other Factors */}
           <section>
-            <h3 className={LIFESTYLE_SECTION_HEADER}>OTHER FACTORS</h3>
+            <h3 className={LIFESTYLE_SECTION_HEADER}>Other Factors</h3>
             <div className={`${LIFESTYLE_GRID} ${LIFESTYLE_GRID_COLS} gap-y-4`}>
               <div className="text-sm font-medium text-slate-700 items-start pt-2">
                 <FieldLabel>Sleep Patterns</FieldLabel>
@@ -1264,7 +1255,7 @@ function LifestyleTab({
   );
 }
 
-const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1 block';
+const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-400 tracking-wider mb-1 block';
 const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
 function OtherTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {

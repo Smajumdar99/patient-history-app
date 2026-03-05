@@ -33,6 +33,7 @@ import {
   MoreVertical,
   ChevronDown,
   Activity,
+  Home,
 } from 'lucide-react';
 import ResidentHistoryWorkspace from './ResidentHistoryWorkspace';
 
@@ -282,29 +283,78 @@ function App() {
 
         {/* Main content */}
         <main className="flex-1 min-w-0 flex flex-col overflow-auto bg-[#F4F6F9]">
-          <div className="p-4 pb-0 shrink-0">
-            <nav className="flex items-center gap-1.5 text-sm text-slate-600 mb-1">
-              <button
-                type="button"
-                className="p-0.5 -ml-0.5 rounded text-slate-600 hover:bg-slate-200/80"
-                aria-label="Back"
-              >
-                <ChevronLeft className="w-4 h-4" />
-              </button>
-              <span>Client</span>
-              <span className="text-slate-400">›</span>
-              <span>John Smith</span>
-              <span className="text-slate-400">›</span>
-              <span>Summary Chart</span>
-              <span className="text-slate-400">›</span>
-              <span className="font-semibold text-slate-900">
-                Resident History / Lifestyle
-              </span>
-            </nav>
-            <h1 className="text-xl font-bold text-slate-900 mt-1">
+          {/* Top action bar with breadcrumb and actions */}
+          <div className="shrink-0 bg-white border-b border-slate-200 px-4 py-3">
+            <div className="flex w-full items-center justify-between">
+              {/* Left: breadcrumb */}
+              <div className="flex flex-col gap-1">
+                <nav
+                  aria-label="Breadcrumb"
+                  className="flex items-center space-x-2 text-sm font-medium"
+                >
+                  <button
+                    type="button"
+                    className="inline-flex items-center justify-center rounded hover:bg-slate-100 p-0.5"
+                    aria-label="Home"
+                  >
+                    <Home
+                      size={16}
+                      className="text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
+                    />
+                  </button>
+
+                  <span className="flex items-center space-x-2">
+                    <ChevronRight size={16} className="text-slate-400" />
+                    <button
+                      type="button"
+                      className="text-slate-500 hover:text-slate-700 cursor-pointer transition-colors"
+                    >
+                      Client
+                    </button>
+                  </span>
+
+                  <span className="flex items-center space-x-2">
+                    <ChevronRight size={16} className="text-slate-400" />
+                    <button
+                      type="button"
+                      className="text-slate-500 hover:text-slate-700 cursor-pointer transition-colors"
+                    >
+                      John Smith
+                    </button>
+                  </span>
+
+                  <span className="flex items-center space-x-2">
+                    <ChevronRight size={16} className="text-slate-400" />
+                    <button
+                      type="button"
+                      className="text-slate-500 hover:text-slate-700 cursor-pointer transition-colors"
+                    >
+                      Summary Chart
+                    </button>
+                  </span>
+
+                  <span className="flex items-center space-x-2">
+                    <ChevronRight size={16} className="text-slate-400" />
+                    <span className="text-slate-700">
+                      Resident History / Lifestyle
+                    </span>
+                  </span>
+                </nav>
+              </div>
+
+              {/* Right: action buttons group placeholder */}
+              <div className="flex items-center space-x-4">
+                {/* Existing or future action buttons (Back, Auto-save status, Print, Settings, Delete) live here */}
+              </div>
+            </div>
+          </div>
+          {/* Page-level heading below breadcrumb bar */}
+          <div className="px-4 pt-4 pb-0">
+            <h1 className="text-xl font-bold text-slate-900">
               Resident History / Lifestyle
             </h1>
           </div>
+
           <div className="flex-1 p-4 pt-4 min-h-0 flex flex-col">
             <ResidentHistoryWorkspace embedded />
           </div>
