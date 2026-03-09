@@ -348,12 +348,6 @@ function App() {
               </div>
             </div>
           </div>
-          {/* Page-level heading below breadcrumb bar */}
-          <div className="px-4 pt-4 pb-0">
-            <h1 className="text-xl font-bold text-slate-900">
-              Resident History / Lifestyle
-            </h1>
-          </div>
 
           <div className="flex-1 p-4 pt-4 min-h-0 flex flex-col">
             <ResidentHistoryWorkspace embedded />
