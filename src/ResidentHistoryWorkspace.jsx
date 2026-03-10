@@ -332,10 +332,10 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
           </nav>
 
           {/* Right content area */}
-          <div className="flex-1 min-w-0 flex flex-col p-6">
-            <div className="bg-white p-6 flex-1 min-h-0 overflow-auto">
+          <div className="flex-1 min-w-0 flex flex-col px-6 pb-6 pt-3">
+            <div className="bg-white px-6 pb-6 pt-3 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
               {/* Card header with Edit button */}
-              <div className="flex items-center justify-between w-full border-b border-slate-200 pb-4 mb-6">
+              <div className="flex items-center justify-between w-full border-b border-slate-200 pb-3 mb-4">
                 <h1 className="text-xl font-bold text-slate-900">
                   {TABS[activeTab]}
                 </h1>
@@ -535,9 +535,9 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
   };
 
   return (
-    <div className="space-y-8">
+    <div className={isEditMode ? 'space-y-8' : 'space-y-5'}>
       {/* Risk Factors */}
-      <section className={!isEditMode ? 'border-b border-slate-200 pb-6 mb-6' : ''}>
+      <section className={!isEditMode ? 'border-b border-slate-200 pb-4 mb-4' : ''}>
         <span className={sectionLabelClass}>Risk Factors</span>
         {!isEditMode ? (
           <div className="w-full">
@@ -915,9 +915,9 @@ function FamilyHistoryTab({
   useEffect(() => {
     if (!activeDropdown) return;
     const handleClickOutside = (e) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
-        setActiveDropdown(null);
-      }
+      const inDropdown = dropdownRef.current && dropdownRef.current.contains(e.target);
+      const inTrigger = e.target.closest('[data-add-diagnosis-trigger]');
+      if (!inDropdown && !inTrigger) setActiveDropdown(null);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
@@ -981,7 +981,7 @@ function FamilyHistoryTab({
     return (
       <div
         ref={dropdownRef}
-        className="absolute z-10 mt-1 w-full bg-white border border-slate-200 rounded-lg shadow-xl py-3"
+        className="relative w-full mt-2 bg-white border border-slate-200 rounded-md shadow-sm mb-4"
       >
         <div className="px-3 pb-2 font-medium text-slate-900">Add Diagnosis</div>
         <div className="flex gap-1 px-3 pb-2">
@@ -1010,7 +1010,7 @@ function FamilyHistoryTab({
             className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
-        <div className="max-h-48 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto">
           {filteredResults.map((item) => (
             <button
               key={item.id}
@@ -1058,6 +1058,7 @@ function FamilyHistoryTab({
               <DiagnosisChips diagnoses={familyDiagnoses.siblings} field="siblings" />
               <div className="relative">
                 <input
+                  data-add-diagnosis-trigger
                   type="text"
                   readOnly
                   placeholder="Add Diagnosis..."
@@ -1099,6 +1100,7 @@ function FamilyHistoryTab({
               <DiagnosisChips diagnoses={familyDiagnoses.spouse} field="spouse" />
               <div className="relative">
                 <input
+                  data-add-diagnosis-trigger
                   type="text"
                   readOnly
                   placeholder="Add Diagnosis..."
@@ -1140,6 +1142,7 @@ function FamilyHistoryTab({
               <DiagnosisChips diagnoses={familyDiagnoses.offspring} field="offspring" />
               <div className="relative">
                 <input
+                  data-add-diagnosis-trigger
                   type="text"
                   readOnly
                   placeholder="Add Diagnosis..."
