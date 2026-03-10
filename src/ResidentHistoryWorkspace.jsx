@@ -590,46 +590,64 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
       <section className={!isEditMode ? 'border-b border-slate-200 pb-6 mb-6' : ''}>
         <span className={sectionLabelClass}>Exams / Tests</span>
         {!isEditMode ? (
-          <div className="w-full">
+          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mt-3">
             {(() => {
-              const list =
-                (data.examsAndTests || EXAMS_AND_TESTS_DEFINITION).filter(
-                  (exam) =>
-                    exam &&
-                    ((exam.status && exam.status !== 'N/A') ||
-                      (exam.notes && exam.notes.trim() !== ''))
-                );
+              const list = (data.examsAndTests || EXAMS_AND_TESTS_DEFINITION).filter(
+                (exam) =>
+                  exam &&
+                  ((exam.status && exam.status !== 'N/A') ||
+                    (exam.notes && exam.notes.trim() !== ''))
+              );
               if (list.length === 0) {
                 return (
-                  <p className="text-sm font-medium text-slate-900">
+                  <p className="text-sm font-medium text-slate-900 px-4 py-3">
                     —
                   </p>
                 );
               }
               return (
-                <ul className="flex flex-col space-y-3">
+                <>
+                  <div className="grid grid-cols-12 gap-3 bg-slate-50 border-b border-slate-200 px-5 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider items-center">
+                    <div className="col-span-4">Exam Name</div>
+                    <div className="col-span-3">Status</div>
+                    <div className="col-span-5">Date / Notes</div>
+                  </div>
                   {list.map((exam) => {
-                    const parts = [];
-                    if (exam.status && exam.status !== 'N/A') {
-                      parts.push(exam.status);
-                    }
-                    if (exam.notes && exam.notes.trim() !== '') {
-                      parts.push(exam.notes.trim());
-                    }
-                    const result = parts.join(' - ');
+                    const statusRaw =
+                      exam.status && exam.status !== 'N/A' ? exam.status : 'N/A';
+                    const notes =
+                      exam.notes && exam.notes.trim() !== ''
+                        ? exam.notes.trim()
+                        : '—';
+                    const statusLower = statusRaw.toLowerCase();
+                    const statusClass =
+                      statusLower === 'normal'
+                        ? 'bg-emerald-50 text-emerald-700'
+                        : statusLower === 'abnormal'
+                          ? 'bg-red-50 text-red-700'
+                          : 'bg-slate-100 text-slate-700';
                     return (
-                      <li
+                      <div
                         key={exam.examName}
-                        className="text-sm text-slate-700"
+                        className="grid grid-cols-12 gap-3 items-center px-5 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50/60 transition-colors text-sm"
                       >
-                        <span className="font-semibold text-slate-900">
-                          {exam.examName}:
-                        </span>{' '}
-                        {result}
-                      </li>
+                        <div className="col-span-4 font-semibold text-slate-900">
+                          {exam.examName}
+                        </div>
+                        <div className="col-span-3">
+                          <span
+                            className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${statusClass}`}
+                          >
+                            {statusRaw}
+                          </span>
+                        </div>
+                        <div className="col-span-5 text-slate-700">
+                          {notes}
+                        </div>
+                      </div>
                     );
                   })}
-                </ul>
+                </>
               );
             })()}
           </div>
