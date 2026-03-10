@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import {
   Pencil,
   Check,
@@ -292,8 +293,8 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
         {/* Inner layout: stepper + content */}
         <div className="flex flex-1 min-h-0">
           {/* Left stepper */}
-          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-6 pl-4 pr-2">
-            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-4 px-2">
+          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-4 pl-4 pr-2">
+            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-3 px-2">
               Sections
             </h2>
             <ul className="space-y-0.5">
@@ -332,8 +333,8 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
           </nav>
 
           {/* Right content area */}
-          <div className="flex-1 min-w-0 flex flex-col px-6 pb-6 pt-3">
-            <div className="bg-white px-6 pb-6 pt-3 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
+          <div className="flex-1 min-w-0 flex flex-col px-4 pb-5 pt-2">
+            <div className="bg-white px-4 pb-5 pt-2 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
               {/* Card header with Edit button */}
               <div className="flex items-center justify-between w-full border-b border-slate-200 pb-3 mb-4">
                 <h1 className="text-xl font-bold text-slate-900">
@@ -429,7 +430,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                 type="button"
                 className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
               >
-                Save & Exit
+                Save
               </button>
             </div>
           ) : (
@@ -903,6 +904,10 @@ function FamilyHistoryTab({
   const [dropdownTab, setDropdownTab] = useState('ICD-10');
   const [searchQuery, setSearchQuery] = useState('fever');
   const dropdownRef = useRef(null);
+  const siblingsTriggerRef = useRef(null);
+  const spouseTriggerRef = useRef(null);
+  const offspringTriggerRef = useRef(null);
+  const [dropdownRect, setDropdownRect] = useState(null);
 
   useEffect(() => {
     setFamilyDiagnoses({
@@ -912,15 +917,45 @@ function FamilyHistoryTab({
     });
   }, [data.siblingsDiagnoses, data.spouseDiagnoses, data.offspringDiagnoses]);
 
+  const getTriggerRef = (field) =>
+    field === 'siblings' ? siblingsTriggerRef : field === 'spouse' ? spouseTriggerRef : offspringTriggerRef;
+
+  useEffect(() => {
+    if (!activeDropdown) {
+      setDropdownRect(null);
+      return;
+    }
+    const triggerRef = getTriggerRef(activeDropdown);
+    if (!triggerRef.current) return;
+    const rect = triggerRef.current.getBoundingClientRect();
+    setDropdownRect({
+      top: rect.bottom + 4,
+      left: rect.left,
+      width: rect.width,
+    });
+  }, [activeDropdown]);
+
   useEffect(() => {
     if (!activeDropdown) return;
     const handleClickOutside = (e) => {
+      const triggerRef = getTriggerRef(activeDropdown);
       const inDropdown = dropdownRef.current && dropdownRef.current.contains(e.target);
-      const inTrigger = e.target.closest('[data-add-diagnosis-trigger]');
+      const inTrigger = triggerRef.current && triggerRef.current.contains(e.target);
       if (!inDropdown && !inTrigger) setActiveDropdown(null);
     };
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activeDropdown]);
+
+  useEffect(() => {
+    if (!activeDropdown) return;
+    const handleScrollOrResize = () => setActiveDropdown(null);
+    window.addEventListener('scroll', handleScrollOrResize, true);
+    window.addEventListener('resize', handleScrollOrResize);
+    return () => {
+      window.removeEventListener('scroll', handleScrollOrResize, true);
+      window.removeEventListener('resize', handleScrollOrResize);
+    };
   }, [activeDropdown]);
 
   const syncDiagnosesToParent = (key, list) => {
@@ -977,11 +1012,16 @@ function FamilyHistoryTab({
   );
 
   const DiagnosisDropdown = ({ field }) => {
-    if (activeDropdown !== field) return null;
-    return (
+    if (activeDropdown !== field || !dropdownRect) return null;
+    return createPortal(
       <div
         ref={dropdownRef}
-        className="relative w-full mt-2 bg-white border border-slate-200 rounded-md shadow-sm mb-4"
+        style={{
+          top: dropdownRect.top,
+          left: dropdownRect.left,
+          width: dropdownRect.width,
+        }}
+        className="fixed z-[9999] bg-white shadow-2xl border border-slate-200 rounded-lg max-h-96 overflow-y-auto"
       >
         <div className="px-3 pb-2 font-medium text-slate-900">Add Diagnosis</div>
         <div className="flex gap-1 px-3 pb-2">
@@ -1023,7 +1063,8 @@ function FamilyHistoryTab({
             </button>
           ))}
         </div>
-      </div>
+      </div>,
+      document.body
     );
   };
 
@@ -1056,7 +1097,7 @@ function FamilyHistoryTab({
           ) : (
             <div className="space-y-2">
               <DiagnosisChips diagnoses={familyDiagnoses.siblings} field="siblings" />
-              <div className="relative">
+              <div className="relative w-full" ref={siblingsTriggerRef}>
                 <input
                   data-add-diagnosis-trigger
                   type="text"
@@ -1098,7 +1139,7 @@ function FamilyHistoryTab({
           ) : (
             <div className="space-y-2">
               <DiagnosisChips diagnoses={familyDiagnoses.spouse} field="spouse" />
-              <div className="relative">
+              <div className="relative w-full" ref={spouseTriggerRef}>
                 <input
                   data-add-diagnosis-trigger
                   type="text"
@@ -1140,7 +1181,7 @@ function FamilyHistoryTab({
           ) : (
             <div className="space-y-2">
               <DiagnosisChips diagnoses={familyDiagnoses.offspring} field="offspring" />
-              <div className="relative">
+              <div className="relative w-full" ref={offspringTriggerRef}>
                 <input
                   data-add-diagnosis-trigger
                   type="text"
