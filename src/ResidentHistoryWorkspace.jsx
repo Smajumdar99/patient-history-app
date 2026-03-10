@@ -511,7 +511,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
   const inputClass =
     'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm';
   const sectionLabelClass =
-    'mb-3 text-xs font-bold tracking-wider uppercase text-slate-400 block';
+    'mb-3 text-xs font-bold tracking-wider text-slate-500 block';
 
   const selectedRiskFactors = data.riskFactors || [];
   const toggleRiskFactor = (name) => {
@@ -951,7 +951,7 @@ function FamilyHistoryTab({
 
   const inputClass =
     'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
-  const labelClass = 'text-[11px] font-bold text-slate-400 tracking-wider mb-1 block';
+  const labelClass = 'text-[11px] font-bold text-slate-500 tracking-wider mb-1 block';
 
   const DiagnosisChips = ({ diagnoses, field }) => (
     <div className="flex flex-wrap gap-2">
@@ -1198,8 +1198,8 @@ function RelativesTab({
   );
 }
 
-const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold tracking-wider text-slate-400 mb-3 block';
-const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold tracking-wider text-slate-400 mb-1 block';
+const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold tracking-wider text-slate-500 mb-3 block';
+const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold tracking-wider text-slate-500 mb-1 block';
 const TOBACCO_STATUS_OPTIONS = ['Never Smoker', 'Current Smoker', 'Former Smoker'];
 
 function LifestyleTab({
@@ -1241,8 +1241,8 @@ function LifestyleTab({
       {!isEditMode ? (
         /* View Mode: strict data table card (read-only) */
         <>
-          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mt-4">
-            <div className="grid grid-cols-12 gap-4 bg-slate-50 border-b border-slate-200 px-6 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wider items-center">
+          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mt-3">
+            <div className="grid grid-cols-12 gap-3 bg-slate-50 border-b border-slate-200 px-5 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider items-center">
               <div className="col-span-3">HABIT / ACTIVITY</div>
               <div className="col-span-3">STATUS</div>
               <div className="col-span-6">DETAILS & DATES</div>
@@ -1265,20 +1265,20 @@ function LifestyleTab({
               return (
                 <div
                   key={row.label}
-                  className="grid grid-cols-12 gap-4 items-center px-6 py-4 border-b border-slate-200 last:border-0 hover:bg-slate-50/50 transition-colors"
+                  className="grid grid-cols-12 gap-3 items-center px-5 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50/50 transition-colors"
                 >
-                  <div className="col-span-3 text-sm font-semibold text-slate-800">{row.label}</div>
+                  <div className="col-span-3 text-[13px] font-semibold text-slate-800">{row.label}</div>
                   <div className="col-span-3">
                     <span
-                      className={`inline-flex px-3 py-1 rounded-md text-sm font-medium ${
+                      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${
                         isActive ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-700'
                       }`}
                     >
                       {status || 'N/A'}
                     </span>
                   </div>
-                  <div className="col-span-6 flex flex-col space-y-1 text-sm text-slate-600">
-                    <span>{details || 'No details provided'}</span>
+                  <div className="col-span-6 flex flex-col space-y-0.5 text-[13px] text-slate-600">
+                    <span className="truncate">{details || 'No details provided'}</span>
                     {(startDate || endDate) && (
                       <span className="text-xs text-slate-400">
                         {startDate ? startDate : ''} {endDate ? `- ${endDate}` : ''}
@@ -1500,7 +1500,7 @@ function LifestyleTab({
   );
 }
 
-const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-400 tracking-wider mb-1 block';
+const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-500 tracking-wider mb-1 block';
 const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
 function OtherTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
