@@ -349,7 +349,7 @@ function App() {
             </div>
           </div>
 
-          <div className="flex-1 p-4 pt-4 min-h-0 flex flex-col">
+          <div className="flex-1 p-2 pt-2 min-h-0 flex flex-col">
             <ResidentHistoryWorkspace embedded />
           </div>
         </main>

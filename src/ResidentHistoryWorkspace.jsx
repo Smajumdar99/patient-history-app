@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Pencil,
-  Check,
   X,
   Search,
   ChevronDown,
@@ -222,6 +221,16 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
   const [isEditMode, setIsEditMode] = useState(false);
   const [mockData, setMockData] = useState(INITIAL_MOCK_DATA);
 
+  const handleFieldChange = (section, field, value) => {
+    setMockData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }));
+  };
+
   const handleSaveChanges = () => {
     setMockData((prev) => {
       const general = prev.general || {};
@@ -264,18 +273,8 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
     setIsEditMode(false);
   };
 
-  const handleFieldChange = (section, field, value) => {
-    setMockData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
-  };
-
   const FieldLabel = ({ children }) => (
-    <div className="text-xs font-bold text-slate-500 tracking-wider mb-1">
+    <div className="text-xs font-bold text-slate-500 tracking-wider mb-0.5">
       {children}
     </div>
   );
@@ -293,8 +292,8 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
         {/* Inner layout: stepper + content */}
         <div className="flex flex-1 min-h-0">
           {/* Left stepper */}
-          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-4 pl-4 pr-2">
-            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-3 px-2">
+          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-1 pl-1 pr-0.5">
+            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 px-1">
               Sections
             </h2>
             <ul className="space-y-0.5">
@@ -306,7 +305,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                     <button
                       type="button"
                       onClick={() => setActiveTab(index)}
-                      className={`w-full flex items-center gap-3 px-2 py-2.5 rounded-md text-left transition-colors ${
+                      className={`w-full flex items-center gap-1.5 px-1 py-1.5 rounded-md text-left transition-colors ${
                         isActive
                           ? 'bg-blue-50 text-[#0056B3]'
                           : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'
@@ -333,10 +332,10 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
           </nav>
 
           {/* Right content area */}
-          <div className="flex-1 min-w-0 flex flex-col px-4 pb-5 pt-2">
-            <div className="bg-white px-4 pb-5 pt-2 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
-              {/* Card header with Edit button */}
-              <div className="flex items-center justify-between w-full border-b border-slate-200 pb-3 mb-4">
+          <div className="flex-1 min-w-0 flex flex-col px-1 pb-2.5 pt-0.5">
+            <div className="bg-white px-1 pb-2.5 pt-0.5 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
+              {/* Card header with Edit / Save button */}
+              <div className="flex items-center justify-between w-full pb-1.5 mb-2">
                 <h1 className="text-xl font-bold text-slate-900">
                   {TABS[activeTab]}
                 </h1>
@@ -344,7 +343,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                   <button
                     type="button"
                     onClick={() => setIsEditMode(true)}
-                    className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                    className="inline-flex items-center gap-1 px-1.5 py-1 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
                   >
                     <Pencil className="w-4 h-4" />
                     Edit
@@ -412,47 +411,27 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                 />
               )}
             </div>
+
+            {isEditMode && (
+              <footer className="shrink-0 px-6 py-4 flex items-center justify-end gap-3 bg-slate-50">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveChanges}
+                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
+                >
+                  Save
+                </button>
+              </footer>
+            )}
           </div>
         </div>
-
-        {/* Footer action bar - fixed at bottom of workspace card */}
-        <footer className="shrink-0 border-t border-slate-200 bg-slate-50 px-6 py-4 flex items-center justify-end">
-          {!isEditMode ? (
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
-              >
-                Save
-              </button>
-            </div>
-          ) : (
-            <div className="flex items-center gap-3">
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={handleSaveChanges}
-                className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
-              >
-                <Check className="w-4 h-4" />
-                Save Changes
-              </button>
-            </div>
-          )}
-        </footer>
     </div>
   );
 
@@ -460,7 +439,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
     return cardContent;
   }
   return (
-    <div className="min-h-screen bg-[#F4F6F9] p-6 flex items-start justify-center">
+    <div className="min-h-screen bg-[#F4F6F9] pt-1.5 pl-1.5 pr-3 pb-3 flex items-start justify-center">
       {cardContent}
     </div>
   );
@@ -510,9 +489,9 @@ const EXAMS_AND_TESTS_DEFINITION = [
 
 function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   const inputClass =
-    'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm';
+    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm';
   const sectionLabelClass =
-    'mb-3 text-xs font-bold tracking-wider text-slate-500 block';
+    'mb-1.5 text-xs font-bold tracking-wider text-slate-500 block';
 
   const selectedRiskFactors = data.riskFactors || [];
   const toggleRiskFactor = (name) => {
@@ -536,13 +515,13 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
   };
 
   return (
-    <div className={isEditMode ? 'space-y-8' : 'space-y-5'}>
+    <div className={isEditMode ? 'space-y-4' : 'space-y-2.5'}>
       {/* Risk Factors */}
-      <section className={!isEditMode ? 'border-b border-slate-200 pb-4 mb-4' : ''}>
+      <section className={!isEditMode ? 'pb-2 mb-2' : ''}>
         <span className={sectionLabelClass}>Risk Factors</span>
         {!isEditMode ? (
           <div className="w-full">
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap gap-1">
               {selectedRiskFactors.length > 0 ? (
                 selectedRiskFactors
                   .map((item) =>
@@ -551,7 +530,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                   .map((label) => (
                     <span
                       key={label}
-                      className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-slate-700 border border-slate-200"
+                      className="inline-flex items-center px-1.5 py-0.5 rounded-full text-sm font-medium bg-white text-slate-700 border border-slate-200"
                     >
                       {label}
                     </span>
@@ -564,7 +543,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
             </div>
           </div>
         ) : (
-          <div className="flex flex-wrap gap-3 mt-2">
+          <div className="flex flex-wrap gap-1.5 mt-1">
             {RISK_FACTOR_OPTIONS.map((name) => {
               const selected = selectedRiskFactors.includes(name);
               return (
@@ -574,8 +553,8 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                   onClick={() => toggleRiskFactor(name)}
                   className={
                     selected
-                      ? 'px-4 py-1.5 rounded-full text-sm font-medium border border-blue-300 bg-blue-50 text-blue-600 transition-colors'
-                      : 'px-4 py-1.5 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors'
+                      ? 'px-2 py-1 rounded-full text-sm font-medium border border-blue-300 bg-blue-50 text-blue-600 transition-colors'
+                      : 'px-2 py-1 rounded-full text-sm font-medium border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-colors'
                   }
                 >
                   {name}
@@ -587,10 +566,10 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
       </section>
 
       {/* Exams / Tests */}
-      <section className={!isEditMode ? 'border-b border-slate-200 pb-6 mb-6' : ''}>
+      <section className={!isEditMode ? 'pb-3 mb-3' : ''}>
         <span className={sectionLabelClass}>Exams / Tests</span>
         {!isEditMode ? (
-          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mt-3">
+          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white mt-1.5">
             {(() => {
               const list = (data.examsAndTests || EXAMS_AND_TESTS_DEFINITION).filter(
                 (exam) =>
@@ -600,14 +579,14 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
               );
               if (list.length === 0) {
                 return (
-                  <p className="text-sm font-medium text-slate-900 px-4 py-3">
+                  <p className="text-sm font-medium text-slate-900 px-2 py-1.5">
                     —
                   </p>
                 );
               }
               return (
                 <>
-                  <div className="grid grid-cols-12 gap-3 bg-slate-50 border-b border-slate-200 px-5 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider items-center">
+                  <div className="grid grid-cols-12 gap-1.5 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
                     <div className="col-span-4">Exam Name</div>
                     <div className="col-span-3">Status</div>
                     <div className="col-span-5">Date / Notes</div>
@@ -625,18 +604,18 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                         ? 'bg-emerald-50 text-emerald-700'
                         : statusLower === 'abnormal'
                           ? 'bg-red-50 text-red-700'
-                          : 'bg-slate-100 text-slate-700';
+                          : 'bg-slate-100 text-slate-600';
                     return (
                       <div
                         key={exam.examName}
-                        className="grid grid-cols-12 gap-3 items-center px-5 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50/60 transition-colors text-sm"
+                        className="grid grid-cols-12 gap-1.5 items-center px-2.5 py-1.5 border-b border-slate-200 last:border-b-0 hover:bg-slate-50/50 transition-colors text-sm"
                       >
-                        <div className="col-span-4 font-semibold text-slate-900">
+                        <div className="col-span-4 font-semibold text-slate-800">
                           {exam.examName}
                         </div>
                         <div className="col-span-3">
                           <span
-                            className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${statusClass}`}
+                            className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${statusClass}`}
                           >
                             {statusRaw}
                           </span>
@@ -653,7 +632,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
           </div>
         ) : (
           <div className="w-full">
-            <div className="grid grid-cols-12 gap-4 mb-2 pb-2 border-b border-slate-200 text-xs font-bold text-slate-500">
+            <div className="grid grid-cols-12 gap-2 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
               <div className="col-span-3">Exam Name</div>
               <div className="col-span-4">Status</div>
               <div className="col-span-5">Date / Notes</div>
@@ -667,7 +646,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                 return (
                   <div
                     key={def.examName}
-                    className="grid grid-cols-12 gap-4 items-center py-2 border-b border-slate-50 last:border-0"
+                    className="grid grid-cols-12 gap-2 items-center px-2.5 py-1.5 border-b border-slate-200 last:border-b-0"
                   >
                     <div className="col-span-3">
                       <span className="text-sm font-semibold text-slate-800">
@@ -675,7 +654,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                       </span>
                     </div>
                     <div className="col-span-4">
-                      <div className="inline-flex bg-slate-100 rounded-md p-1 space-x-1">
+                      <div className="inline-flex bg-slate-100 rounded-md p-0.5 space-x-0.5">
                         {EXAM_STATUS_OPTIONS.map((statusOption) => {
                           const isActive = current.status === statusOption;
                           const activeClass =
@@ -691,7 +670,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                             onClick={() =>
                               updateExam(def.examName, 'status', statusOption)
                             }
-                            className={`px-3 py-1 rounded-md text-sm font-medium ${
+                            className={`px-1.5 py-0.5 rounded-md text-sm font-medium ${
                               isActive
                                 ? activeClass
                                 : 'text-slate-500 hover:text-slate-700'
@@ -743,9 +722,9 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2">
             <div>
-              <label className="text-xs font-medium text-slate-700 mb-1 block">
+              <label className="text-xs font-medium text-slate-700 mb-0.5 block">
                 Contraceptive Complication
               </label>
               <textarea
@@ -757,7 +736,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
               />
             </div>
             <div>
-              <label className="text-xs font-medium text-slate-700 mb-1 block">
+              <label className="text-xs font-medium text-slate-700 mb-0.5 block">
                 Other Specify
               </label>
               <input
@@ -775,124 +754,131 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
   );
 }
 
+const HPI_VIEW_ROWS = [
+  { label: 'Location', key: 'location' },
+  { label: 'Quality', key: 'quality' },
+  { label: 'Severity', key: 'severity' },
+  { label: 'Duration', key: 'duration' },
+  { label: 'Timing', key: 'timing' },
+  { label: 'Context', key: 'context' },
+  { label: 'Associated Signs/Symptoms', key: 'associatedSigns' },
+  { label: 'Modifying factors', key: 'modifyingFactors' },
+];
+
 function HPITab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   const severityOptions = ['Mild', 'Moderate', 'Severe', 'Fatal'];
+
+  if (!isEditMode) {
+    return (
+      <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <th className="px-2.5 py-1.5 font-semibold">Category</th>
+              <th className="px-2.5 py-1.5 font-semibold">Description</th>
+            </tr>
+          </thead>
+          <tbody>
+            {HPI_VIEW_ROWS.map(({ label, key }) => (
+              <tr key={key} className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50/50 transition-colors">
+                <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top w-[180px]">
+                  {label}
+                </td>
+                <td className="px-2.5 py-1.5 text-slate-700">
+                  {data[key] || '—'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 gap-x-8 gap-y-5">
+    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
       <div>
         <FieldLabel>Location</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.location}
-            onChange={(e) => onFieldChange('location', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.location}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.location}
+          onChange={(e) => onFieldChange('location', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div>
         <FieldLabel>Quality</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.quality}
-            onChange={(e) => onFieldChange('quality', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.quality}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.quality}
+          onChange={(e) => onFieldChange('quality', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div>
         <FieldLabel>Severity</FieldLabel>
-        {isEditMode ? (
-          <select
-            value={data.severityValue}
-            onChange={(e) => {
-              onFieldChange('severityValue', e.target.value);
-              onFieldChange(
-                'severity',
-                `${e.target.value} (Pain scale 5/10).`
-              );
-            }}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          >
-            {severityOptions.map((opt) => (
-              <option key={opt} value={opt}>
-                {opt}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <FieldValue>{data.severity}</FieldValue>
-        )}
+        <select
+          value={data.severityValue}
+          onChange={(e) => {
+            onFieldChange('severityValue', e.target.value);
+            onFieldChange(
+              'severity',
+              `${e.target.value} (Pain scale 5/10).`
+            );
+          }}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        >
+          {severityOptions.map((opt) => (
+            <option key={opt} value={opt}>
+              {opt}
+            </option>
+          ))}
+        </select>
       </div>
       <div>
         <FieldLabel>Duration</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.duration}
-            onChange={(e) => onFieldChange('duration', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.duration}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.duration}
+          onChange={(e) => onFieldChange('duration', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div>
         <FieldLabel>Timing</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.timing}
-            onChange={(e) => onFieldChange('timing', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.timing}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.timing}
+          onChange={(e) => onFieldChange('timing', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div>
         <FieldLabel>Context</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.context}
-            onChange={(e) => onFieldChange('context', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.context}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.context}
+          onChange={(e) => onFieldChange('context', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div>
         <FieldLabel>Associated Signs/Symptoms</FieldLabel>
-        {isEditMode ? (
-          <input
-            type="text"
-            value={data.associatedSigns}
-            onChange={(e) => onFieldChange('associatedSigns', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        ) : (
-          <FieldValue>{data.associatedSigns}</FieldValue>
-        )}
+        <input
+          type="text"
+          value={data.associatedSigns}
+          onChange={(e) => onFieldChange('associatedSigns', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+        />
       </div>
       <div className="col-span-2">
         <FieldLabel>Modifying factors</FieldLabel>
-        {isEditMode ? (
-          <textarea
-            value={data.modifyingFactors}
-            onChange={(e) => onFieldChange('modifyingFactors', e.target.value)}
-            className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[80px]"
-            rows={3}
-          />
-        ) : (
-          <FieldValue>{data.modifyingFactors}</FieldValue>
-        )}
+        <textarea
+          value={data.modifyingFactors}
+          onChange={(e) => onFieldChange('modifyingFactors', e.target.value)}
+          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[80px]"
+          rows={3}
+        />
       </div>
     </div>
   );
@@ -982,6 +968,9 @@ function FamilyHistoryTab({
 
   const diagnosesKey = (field) => (field === 'siblings' ? 'siblingsDiagnoses' : field === 'spouse' ? 'spouseDiagnoses' : 'offspringDiagnoses');
 
+  const formatDiagnoses = (list) =>
+    (list && list.length > 0) ? list.map((d) => d.label).join(', ') : 'None reported';
+
   const addDiagnosis = (field, item) => {
     const list = familyDiagnoses[field] || [];
     if (list.some((d) => d.id === item.id)) return;
@@ -1003,15 +992,15 @@ function FamilyHistoryTab({
   );
 
   const inputClass =
-    'border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
-  const labelClass = 'text-[11px] font-bold text-slate-500 tracking-wider mb-1 block';
+    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
+  const labelClass = 'text-[11px] font-bold text-slate-500 tracking-wider mb-0.5 block';
 
   const DiagnosisChips = ({ diagnoses, field }) => (
     <div className="flex flex-wrap gap-2">
       {(diagnoses || []).map((d, i) => (
         <span
           key={`${d.id}-${i}`}
-          className="inline-flex items-center gap-2 bg-slate-100 text-slate-700 rounded-full px-3 py-1.5 text-sm cursor-pointer hover:bg-slate-200"
+          className="inline-flex items-center gap-1 bg-slate-100 text-slate-700 rounded-full px-1.5 py-1 text-sm cursor-pointer hover:bg-slate-200"
         >
           {d.label}
           {isEditMode && (
@@ -1041,14 +1030,14 @@ function FamilyHistoryTab({
         }}
         className="fixed z-[9999] bg-white shadow-2xl border border-slate-200 rounded-lg max-h-96 overflow-y-auto"
       >
-        <div className="px-3 pb-2 font-medium text-slate-900">Add Diagnosis</div>
-        <div className="flex gap-1 px-3 pb-2">
+        <div className="px-1.5 pb-1 font-medium text-slate-900">Add Diagnosis</div>
+        <div className="flex gap-1 px-1.5 pb-1">
           {['ICD-10', 'SNOMED', 'DSM-5'].map((tab) => (
             <button
               key={tab}
               type="button"
               onClick={() => setDropdownTab(tab)}
-              className={`px-3 py-1.5 rounded text-sm font-medium transition-colors ${
+              className={`px-1.5 py-1 rounded text-sm font-medium transition-colors ${
                 dropdownTab === tab
                   ? 'bg-white text-blue-600 border border-slate-200 shadow-sm'
                   : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
@@ -1058,14 +1047,14 @@ function FamilyHistoryTab({
             </button>
           ))}
         </div>
-        <div className="relative px-3 pb-2">
+        <div className="relative px-1.5 pb-1">
           <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="fever"
-            className="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full pl-9 pr-1.5 py-1 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
           />
         </div>
         <div className="max-h-80 overflow-y-auto">
@@ -1074,7 +1063,7 @@ function FamilyHistoryTab({
               key={item.id}
               type="button"
               onClick={() => addDiagnosis(field, item)}
-              className="w-full text-left px-3 py-3 text-sm text-slate-800 hover:bg-slate-50 cursor-pointer flex gap-4 border-b border-slate-100 last:border-0"
+              className="w-full text-left px-1.5 py-1.5 text-sm text-slate-800 hover:bg-slate-50 cursor-pointer flex gap-2"
             >
               <span className="font-bold shrink-0">{item.id}</span>
               <span>{item.label}</span>
@@ -1086,52 +1075,76 @@ function FamilyHistoryTab({
     );
   };
 
+  if (!isEditMode) {
+    const rows = [
+      { familyMember: 'Siblings', nameCount: data.siblings || '—', diagnoses: formatDiagnoses(familyDiagnoses.siblings) },
+      { familyMember: 'Spouse', nameCount: data.spouse || '—', diagnoses: formatDiagnoses(familyDiagnoses.spouse) },
+      { familyMember: 'Offspring', nameCount: data.offspring || 'None recorded', diagnoses: formatDiagnoses(familyDiagnoses.offspring) },
+    ];
+    return (
+      <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <th className="px-2.5 py-1.5 font-semibold">Family Member</th>
+              <th className="px-2.5 py-1.5 font-semibold">Name / Count</th>
+              <th className="px-2.5 py-1.5 font-semibold">Diagnosis / ICD Codes</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.familyMember} className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50/50 transition-colors">
+                <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top w-[140px]">
+                  {row.familyMember}
+                </td>
+                <td className="px-2.5 py-1.5 text-slate-700 align-top">
+                  {row.nameCount}
+                </td>
+                <td className="px-2.5 py-1.5 text-slate-700">
+                  {row.diagnoses}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Row: Siblings */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
           <label className={labelClass}>Siblings</label>
-          {isEditMode ? (
-            <input
-              type="text"
-              value={data.siblings}
-              onChange={(e) => onFieldChange('siblings', e.target.value)}
-              className={inputClass}
-              placeholder="e.g. 2 Sisters"
-            />
-          ) : (
-            <FieldValue>{data.siblings}</FieldValue>
-          )}
+          <input
+            type="text"
+            value={data.siblings}
+            onChange={(e) => onFieldChange('siblings', e.target.value)}
+            className={inputClass}
+            placeholder="e.g. 2 Sisters"
+          />
         </div>
         <div className="relative">
           <FieldLabel>Diagnosis / ICD Codes</FieldLabel>
-          {!isEditMode ? (
-            <FieldValue>
-              {familyDiagnoses.siblings.length > 0
-                ? familyDiagnoses.siblings.map((d) => d.label).join(', ')
-                : 'None reported'}
-            </FieldValue>
-          ) : (
-            <div className="space-y-2">
-              <DiagnosisChips diagnoses={familyDiagnoses.siblings} field="siblings" />
-              <div className="relative w-full" ref={siblingsTriggerRef}>
-                <input
-                  data-add-diagnosis-trigger
-                  type="text"
-                  readOnly
-                  placeholder="Add Diagnosis..."
-                  onClick={() => setActiveDropdown(activeDropdown === 'siblings' ? null : 'siblings')}
-                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
-                />
-                <DiagnosisDropdown field="siblings" />
-              </div>
+          <div className="space-y-2">
+            <DiagnosisChips diagnoses={familyDiagnoses.siblings} field="siblings" />
+            <div className="relative w-full" ref={siblingsTriggerRef}>
+              <input
+                data-add-diagnosis-trigger
+                type="text"
+                readOnly
+                placeholder="Add Diagnosis..."
+                onClick={() => setActiveDropdown(activeDropdown === 'siblings' ? null : 'siblings')}
+                className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
+              />
+              <DiagnosisDropdown field="siblings" />
             </div>
-          )}
+          </div>
         </div>
       </div>
       {/* Row: Spouse */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
           <label className={labelClass}>Spouse</label>
           {isEditMode ? (
@@ -1173,7 +1186,7 @@ function FamilyHistoryTab({
         </div>
       </div>
       {/* Row: Offspring */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
           <label className={labelClass}>Offspring</label>
           {isEditMode ? (
@@ -1218,6 +1231,18 @@ function FamilyHistoryTab({
   );
 }
 
+const RELATIVES_FIELDS = [
+  ['cancer', 'Cancer'],
+  ['tuberculosis', 'Tuberculosis'],
+  ['diabetes', 'Diabetes'],
+  ['highBloodPressure', 'High Blood Pressure'],
+  ['heartProblems', 'Heart Problems'],
+  ['stroke', 'Stroke'],
+  ['epilepsy', 'Epilepsy'],
+  ['mentalIllness', 'Mental Illness'],
+  ['suicide', 'Suicide'],
+];
+
 function RelativesTab({
   data,
   isEditMode,
@@ -1225,40 +1250,52 @@ function RelativesTab({
   FieldLabel,
   FieldValue,
 }) {
-  const fields = [
-    ['cancer', 'Cancer'],
-    ['tuberculosis', 'Tuberculosis'],
-    ['diabetes', 'Diabetes'],
-    ['highBloodPressure', 'High Blood Pressure'],
-    ['heartProblems', 'Heart Problems'],
-    ['stroke', 'Stroke'],
-    ['epilepsy', 'Epilepsy'],
-    ['mentalIllness', 'Mental Illness'],
-    ['suicide', 'Suicide'],
-  ];
+  if (!isEditMode) {
+    return (
+      <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+              <th className="px-2.5 py-1.5 font-semibold">Condition</th>
+              <th className="px-2.5 py-1.5 font-semibold">Relatives / Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            {RELATIVES_FIELDS.map(([key, label]) => (
+              <tr key={key} className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50/50 transition-colors">
+                <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top w-[180px]">
+                  {label}
+                </td>
+                <td className="px-2.5 py-1.5 text-slate-700">
+                  {data[key] || 'None reported'}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    );
+  }
+
   return (
-    <div className="grid grid-cols-2 gap-x-12 gap-y-6">
-      {fields.map(([key, label]) => (
+    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
+      {RELATIVES_FIELDS.map(([key, label]) => (
         <div key={key}>
           <FieldLabel>{label}</FieldLabel>
-          {isEditMode ? (
-            <input
-              type="text"
-              value={data[key]}
-              onChange={(e) => onFieldChange(key, e.target.value)}
-              className="border border-slate-300 rounded-md px-3 py-2 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-            />
-          ) : (
-            <FieldValue>{data[key]}</FieldValue>
-          )}
+          <input
+            type="text"
+            value={data[key]}
+            onChange={(e) => onFieldChange(key, e.target.value)}
+            className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+          />
         </div>
       ))}
     </div>
   );
 }
 
-const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold tracking-wider text-slate-500 mb-3 block';
-const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold tracking-wider text-slate-500 mb-1 block';
+const LIFESTYLE_SECTION_HEADER = 'text-[11px] font-bold tracking-wider text-slate-500 mb-1.5 block';
+const LIFESTYLE_VIEW_LABEL = 'text-[11px] font-bold tracking-wider text-slate-500 mb-0.5 block';
 const TOBACCO_STATUS_OPTIONS = ['Never Smoker', 'Current Smoker', 'Former Smoker'];
 
 function LifestyleTab({
@@ -1274,7 +1311,7 @@ function LifestyleTab({
     'date-input-compact w-[150px] h-[36px] pl-3 pr-8 text-sm bg-slate-50 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500 outline-none';
 
   const SegmentedToggle = ({ field, options }) => (
-    <div className="w-full inline-flex bg-slate-50 border border-slate-100 rounded-md p-1 box-border">
+    <div className="w-full inline-flex bg-slate-50 border border-slate-100 rounded-md p-0.5 box-border">
       {options.map((opt) => {
         const active = (data[field] || '') === opt;
         return (
@@ -1282,7 +1319,7 @@ function LifestyleTab({
             key={opt}
             type="button"
             onClick={() => onFieldChange(field, opt)}
-            className={`flex-1 py-1 px-2 text-xs rounded-md transition-colors font-medium ${
+            className={`flex-1 py-0.5 px-1 text-xs rounded-md transition-colors font-medium ${
               active
                 ? 'bg-white shadow-sm text-blue-600'
                 : 'text-slate-500 hover:text-slate-700'
@@ -1296,12 +1333,12 @@ function LifestyleTab({
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {!isEditMode ? (
         /* View Mode: strict data table card (read-only) */
         <>
-          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white shadow-sm mt-3">
-            <div className="grid grid-cols-12 gap-3 bg-slate-50 border-b border-slate-200 px-5 py-2 text-[11px] font-semibold text-slate-500 uppercase tracking-wider items-center">
+          <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white mt-1.5">
+            <div className="grid grid-cols-12 gap-1.5 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
               <div className="col-span-3">HABIT / ACTIVITY</div>
               <div className="col-span-3">STATUS</div>
               <div className="col-span-6">DETAILS & DATES</div>
@@ -1315,28 +1352,29 @@ function LifestyleTab({
               { label: 'Counseling', statusField: 'counselingStatus', detailsField: 'counselingDetails', startField: 'counselingStartDate', endField: 'counselingEndDate' },
               { label: 'Exercise Patterns', statusField: 'exerciseStatus', detailsField: 'exerciseDetails', startField: 'exerciseStartDate', endField: 'exerciseEndDate' },
               { label: 'Hazardous Activities', statusField: 'hazardousStatus', detailsField: 'hazardousDetails', startField: 'hazardousDate', endField: 'hazardousEndDate' },
-            ].map((row) => {
+            ].map((row, index, arr) => {
               const status = data[row.statusField] || '';
               const details = data[row.detailsField] || '';
               const startDate = data[row.startField] || '';
               const endDate = data[row.endField] || '';
               const isActive = status === 'Current' || status === 'Active' || status === 'Ongoing';
+              const isLast = index === arr.length - 1;
               return (
                 <div
                   key={row.label}
-                  className="grid grid-cols-12 gap-3 items-center px-5 py-2.5 border-b border-slate-200 last:border-0 hover:bg-slate-50/50 transition-colors"
+                  className={`grid grid-cols-12 gap-1.5 items-center px-2.5 py-1.5 hover:bg-slate-50/50 transition-colors ${!isLast ? 'border-b border-slate-200' : ''}`}
                 >
                   <div className="col-span-3 text-[13px] font-semibold text-slate-800">{row.label}</div>
                   <div className="col-span-3">
                     <span
-                      className={`inline-flex px-2.5 py-1 rounded-md text-xs font-medium ${
-                        isActive ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-700'
+                      className={`inline-flex px-2 py-0.5 rounded-full text-xs font-medium ${
+                        isActive ? 'bg-blue-50 text-blue-700' : 'bg-slate-100 text-slate-600'
                       }`}
                     >
                       {status || 'N/A'}
                     </span>
                   </div>
-                  <div className="col-span-6 flex flex-col space-y-0.5 text-[13px] text-slate-600">
+                  <div className="col-span-6 flex flex-col space-y-0.5 text-[13px] text-slate-700">
                     <span className="truncate">{details || 'No details provided'}</span>
                     {(startDate || endDate) && (
                       <span className="text-xs text-slate-400">
@@ -1349,7 +1387,7 @@ function LifestyleTab({
             })}
           </div>
 
-          <div className="mt-6 space-y-4">
+          <div className="mt-3 space-y-2">
             <div>
               <div className="text-sm font-bold text-slate-700">Sleep Patterns</div>
               <div className="text-sm text-slate-600">{data.sleepPatterns || '—'}</div>
@@ -1365,7 +1403,7 @@ function LifestyleTab({
           {/* Single continuous list: Substance Use + Wellness (no gap between Coffee and Counseling) */}
           <section className="mb-0">
             <h3 className={LIFESTYLE_SECTION_HEADER}>Substance Use History</h3>
-            <div className="grid grid-cols-12 gap-4 mb-2 pb-2 border-b border-slate-200 text-xs font-bold text-slate-500">
+            <div className="grid grid-cols-12 gap-2 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
               <div className="col-span-2">Substance</div>
               <div className="col-span-3">Details / Frequency</div>
               <div className="col-span-3">Status</div>
@@ -1446,9 +1484,9 @@ function LifestyleTab({
             ].map((row) => (
               <div
                 key={row.label}
-                className="grid grid-cols-12 gap-4 items-center py-2 border-b border-slate-50 last:border-0"
+                className="grid grid-cols-12 gap-2 items-center px-2.5 py-1.5 border-b border-slate-200 last:border-b-0"
               >
-                <div className="col-span-2 text-sm font-semibold text-slate-700">
+                <div className="col-span-2 text-sm font-semibold text-slate-800">
                   {row.label}
                 </div>
                 <div className="col-span-3">
@@ -1559,14 +1597,14 @@ function LifestyleTab({
   );
 }
 
-const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-500 tracking-wider mb-1 block';
-const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-2 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
+const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-500 tracking-wider mb-0.5 block';
+const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
 function OtherTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   return (
     <div className="space-y-6">
       {/* Row 1: Name/Value pairs - two columns */}
-      <div className="grid grid-cols-2 gap-x-8 gap-y-4">
+      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
         <div>
           <label className={OTHER_TAB_LABEL}>Name/Value:</label>
           {isEditMode ? (
