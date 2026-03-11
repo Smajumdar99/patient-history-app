@@ -292,10 +292,7 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
         {/* Inner layout: stepper + content */}
         <div className="flex flex-1 min-h-0">
           {/* Left stepper */}
-          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 py-1 pl-1 pr-0.5">
-            <h2 className="text-xs font-bold text-slate-500 tracking-wider mb-1.5 px-1">
-              Sections
-            </h2>
+          <nav className="w-56 shrink-0 bg-white border-r border-slate-200 pt-1.5 pb-1 pl-1.5 pr-0.5">
             <ul className="space-y-0.5">
               {TABS.map((label, index) => {
                 const isActive = activeTab === index;
@@ -489,7 +486,7 @@ const EXAMS_AND_TESTS_DEFINITION = [
 
 function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   const inputClass =
-    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm';
+    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-1 focus:ring-blue-500 outline-none text-sm';
   const sectionLabelClass =
     'mb-1.5 text-xs font-bold tracking-wider text-slate-500 block';
 
@@ -586,7 +583,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
               }
               return (
                 <>
-                  <div className="grid grid-cols-12 gap-1.5 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
+                  <div className="grid grid-cols-12 gap-1.5 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
                     <div className="col-span-4">Exam Name</div>
                     <div className="col-span-3">Status</div>
                     <div className="col-span-5">Date / Notes</div>
@@ -632,7 +629,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
           </div>
         ) : (
           <div className="w-full">
-            <div className="grid grid-cols-12 gap-2 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
+            <div className="grid grid-cols-12 gap-2 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
               <div className="col-span-3">Exam Name</div>
               <div className="col-span-4">Status</div>
               <div className="col-span-5">Date / Notes</div>
@@ -646,14 +643,14 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                 return (
                   <div
                     key={def.examName}
-                    className="grid grid-cols-12 gap-2 items-center px-2.5 py-1.5 border-b border-slate-200 last:border-b-0"
+                    className="grid grid-cols-12 gap-2 items-stretch border-b border-slate-200 last:border-b-0"
                   >
-                    <div className="col-span-3">
+                    <div className="col-span-3 px-2.5 py-2 flex items-center">
                       <span className="text-sm font-semibold text-slate-800">
                         {def.examName}
                       </span>
                     </div>
-                    <div className="col-span-4">
+                    <div className="col-span-4 px-2.5 py-2 flex items-center">
                       <div className="inline-flex bg-slate-100 rounded-md p-0.5 space-x-0.5">
                         {EXAM_STATUS_OPTIONS.map((statusOption) => {
                           const isActive = current.status === statusOption;
@@ -682,7 +679,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                         })}
                       </div>
                     </div>
-                    <div className="col-span-5">
+                    <div className="col-span-5 p-0 flex items-stretch">
                       <input
                         type="text"
                         value={current.notes}
@@ -690,7 +687,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                           updateExam(def.examName, 'notes', e.target.value)
                         }
                         placeholder="MM/DD/YYYY or Notes"
-                        className="w-full text-sm border-slate-200 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 placeholder:text-slate-400"
+                        className="w-full h-full min-h-[44px] px-3 py-2 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -773,7 +770,7 @@ function HPITab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
       <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
               <th className="px-2.5 py-1.5 font-semibold">Category</th>
               <th className="px-2.5 py-1.5 font-semibold">Description</th>
             </tr>
@@ -795,91 +792,118 @@ function HPITab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
     );
   }
 
+  const cellInputClass = 'w-full h-full min-h-[44px] px-3 py-2 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors';
+  const cellTextareaClass = 'w-full min-h-[80px] px-3 py-2 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors resize-none';
+
   return (
-    <div className="grid grid-cols-2 gap-x-4 gap-y-2.5">
-      <div>
-        <FieldLabel>Location</FieldLabel>
-        <input
-          type="text"
-          value={data.location}
-          onChange={(e) => onFieldChange('location', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div>
-        <FieldLabel>Quality</FieldLabel>
-        <input
-          type="text"
-          value={data.quality}
-          onChange={(e) => onFieldChange('quality', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div>
-        <FieldLabel>Severity</FieldLabel>
-        <select
-          value={data.severityValue}
-          onChange={(e) => {
-            onFieldChange('severityValue', e.target.value);
-            onFieldChange(
-              'severity',
-              `${e.target.value} (Pain scale 5/10).`
-            );
-          }}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        >
-          {severityOptions.map((opt) => (
-            <option key={opt} value={opt}>
-              {opt}
-            </option>
-          ))}
-        </select>
-      </div>
-      <div>
-        <FieldLabel>Duration</FieldLabel>
-        <input
-          type="text"
-          value={data.duration}
-          onChange={(e) => onFieldChange('duration', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div>
-        <FieldLabel>Timing</FieldLabel>
-        <input
-          type="text"
-          value={data.timing}
-          onChange={(e) => onFieldChange('timing', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div>
-        <FieldLabel>Context</FieldLabel>
-        <input
-          type="text"
-          value={data.context}
-          onChange={(e) => onFieldChange('context', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div>
-        <FieldLabel>Associated Signs/Symptoms</FieldLabel>
-        <input
-          type="text"
-          value={data.associatedSigns}
-          onChange={(e) => onFieldChange('associatedSigns', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-        />
-      </div>
-      <div className="col-span-2">
-        <FieldLabel>Modifying factors</FieldLabel>
-        <textarea
-          value={data.modifyingFactors}
-          onChange={(e) => onFieldChange('modifyingFactors', e.target.value)}
-          className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm min-h-[80px]"
-          rows={3}
-        />
-      </div>
+    <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+            <th className="px-2.5 py-1.5 font-semibold w-[200px]">Category</th>
+            <th className="px-2.5 py-1.5 font-semibold">Description</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Location</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.location}
+                onChange={(e) => onFieldChange('location', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Quality</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.quality}
+                onChange={(e) => onFieldChange('quality', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Severity</td>
+            <td className="p-0 align-top">
+              <div className="relative w-full">
+                <select
+                  value={data.severityValue}
+                  onChange={(e) => {
+                    onFieldChange('severityValue', e.target.value);
+                    onFieldChange('severity', `${e.target.value} (Pain scale 5/10).`);
+                  }}
+                  className={cellInputClass + ' cursor-pointer appearance-none bg-transparent pr-8'}
+                >
+                  {severityOptions.map((opt) => (
+                    <option key={opt} value={opt}>{opt}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+              </div>
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Duration</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.duration}
+                onChange={(e) => onFieldChange('duration', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Timing</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.timing}
+                onChange={(e) => onFieldChange('timing', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Context</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.context}
+                onChange={(e) => onFieldChange('context', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Associated Signs/Symptoms</td>
+            <td className="p-0 align-top">
+              <input
+                type="text"
+                value={data.associatedSigns}
+                onChange={(e) => onFieldChange('associatedSigns', e.target.value)}
+                className={cellInputClass}
+              />
+            </td>
+          </tr>
+          <tr className="border-b border-slate-200 last:border-b-0">
+            <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Modifying factors</td>
+            <td className="p-0 align-top">
+              <textarea
+                value={data.modifyingFactors}
+                onChange={(e) => onFieldChange('modifyingFactors', e.target.value)}
+                className={cellTextareaClass}
+                rows={3}
+              />
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -992,7 +1016,7 @@ function FamilyHistoryTab({
   );
 
   const inputClass =
-    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
+    'border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none text-sm';
   const labelClass = 'text-[11px] font-bold text-slate-500 tracking-wider mb-0.5 block';
 
   const DiagnosisChips = ({ diagnoses, field }) => (
@@ -1054,7 +1078,7 @@ function FamilyHistoryTab({
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="fever"
-            className="w-full pl-9 pr-1.5 py-1 border border-slate-200 rounded-md text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+            className="w-full pl-9 pr-1.5 py-1 border border-slate-200 rounded-md text-sm focus:ring-1 focus:ring-blue-500 outline-none"
           />
         </div>
         <div className="max-h-80 overflow-y-auto">
@@ -1085,7 +1109,7 @@ function FamilyHistoryTab({
       <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
               <th className="px-2.5 py-1.5 font-semibold">Family Member</th>
               <th className="px-2.5 py-1.5 font-semibold">Name / Count</th>
               <th className="px-2.5 py-1.5 font-semibold">Diagnosis / ICD Codes</th>
@@ -1136,7 +1160,7 @@ function FamilyHistoryTab({
                 readOnly
                 placeholder="Add Diagnosis..."
                 onClick={() => setActiveDropdown(activeDropdown === 'siblings' ? null : 'siblings')}
-                className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
+                className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
               />
               <DiagnosisDropdown field="siblings" />
             </div>
@@ -1177,7 +1201,7 @@ function FamilyHistoryTab({
                   readOnly
                   placeholder="Add Diagnosis..."
                   onClick={() => setActiveDropdown(activeDropdown === 'spouse' ? null : 'spouse')}
-                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
+                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
                 />
                 <DiagnosisDropdown field="spouse" />
               </div>
@@ -1219,7 +1243,7 @@ function FamilyHistoryTab({
                   readOnly
                   placeholder="Add Diagnosis..."
                   onClick={() => setActiveDropdown(activeDropdown === 'offspring' ? null : 'offspring')}
-                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500`}
+                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
                 />
                 <DiagnosisDropdown field="offspring" />
               </div>
@@ -1255,7 +1279,7 @@ function RelativesTab({
       <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-white border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+            <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
               <th className="px-2.5 py-1.5 font-semibold">Condition</th>
               <th className="px-2.5 py-1.5 font-semibold">Relatives / Details</th>
             </tr>
@@ -1277,19 +1301,36 @@ function RelativesTab({
     );
   }
 
+  const cellInputClass = 'w-full h-full min-h-[44px] px-3 py-2 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors';
+
   return (
-    <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-      {RELATIVES_FIELDS.map(([key, label]) => (
-        <div key={key}>
-          <FieldLabel>{label}</FieldLabel>
-          <input
-            type="text"
-            value={data[key]}
-            onChange={(e) => onFieldChange(key, e.target.value)}
-            className="border border-slate-300 rounded-md px-1.5 py-1 w-full focus:ring-2 focus:ring-blue-500 outline-none text-sm"
-          />
-        </div>
-      ))}
+    <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+            <th className="px-2.5 py-1.5 font-semibold w-[200px]">Condition</th>
+            <th className="px-2.5 py-1.5 font-semibold">Relatives / Details</th>
+          </tr>
+        </thead>
+        <tbody>
+          {RELATIVES_FIELDS.map(([key, label]) => (
+            <tr key={key} className="border-b border-slate-200 last:border-b-0">
+              <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">
+                {label}
+              </td>
+              <td className="p-0 align-top">
+                <input
+                  type="text"
+                  value={data[key]}
+                  onChange={(e) => onFieldChange(key, e.target.value)}
+                  placeholder="None reported"
+                  className={cellInputClass}
+                />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -1306,9 +1347,9 @@ function LifestyleTab({
   FieldValue,
 }) {
   const compactInputClass =
-    'w-full text-sm py-1.5 px-2.5 border border-slate-200 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 outline-none';
+    'w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
   const compactDateInputClass =
-    'date-input-compact w-[150px] h-[36px] pl-3 pr-8 text-sm bg-slate-50 border border-slate-200 rounded-md focus:border-blue-500 focus:ring-blue-500 outline-none';
+    'date-input-compact w-[150px] h-[36px] pl-3 pr-8 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
 
   const SegmentedToggle = ({ field, options }) => (
     <div className="w-full inline-flex bg-slate-50 border border-slate-100 rounded-md p-0.5 box-border">
@@ -1338,7 +1379,7 @@ function LifestyleTab({
         /* View Mode: strict data table card (read-only) */
         <>
           <div className="w-full border border-slate-200 rounded-lg overflow-hidden bg-white mt-1.5">
-            <div className="grid grid-cols-12 gap-1.5 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
+            <div className="grid grid-cols-12 gap-1.5 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
               <div className="col-span-3">HABIT / ACTIVITY</div>
               <div className="col-span-3">STATUS</div>
               <div className="col-span-6">DETAILS & DATES</div>
@@ -1403,7 +1444,7 @@ function LifestyleTab({
           {/* Single continuous list: Substance Use + Wellness (no gap between Coffee and Counseling) */}
           <section className="mb-0">
             <h3 className={LIFESTYLE_SECTION_HEADER}>Substance Use History</h3>
-            <div className="grid grid-cols-12 gap-2 bg-white border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500 items-center">
+            <div className="grid grid-cols-12 gap-2 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
               <div className="col-span-2">Substance</div>
               <div className="col-span-3">Details / Frequency</div>
               <div className="col-span-3">Status</div>
@@ -1508,7 +1549,7 @@ function LifestyleTab({
                         onChange={(e) =>
                           onFieldChange(row.statusField, e.target.value)
                         }
-                        className="w-full h-[36px] m-0 pl-[16px] pr-8 py-1 text-sm bg-white border border-slate-200 rounded-md shadow-sm focus:border-blue-500 focus:ring-blue-500 outline-none appearance-none box-border"
+                        className="w-full h-[36px] m-0 pl-[16px] pr-8 py-1 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none appearance-none box-border"
                       >
                         <option value="Unassigned">Unassigned</option>
                         <option value="Current every day smoker">Current every day smoker</option>
@@ -1598,7 +1639,7 @@ function LifestyleTab({
 }
 
 const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-500 tracking-wider mb-0.5 block';
-const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-1 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none';
+const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
 function OtherTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   return (
