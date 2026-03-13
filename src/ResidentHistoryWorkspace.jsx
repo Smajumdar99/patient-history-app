@@ -344,7 +344,7 @@ const ResidentHistoryWorkspace = forwardRef(function ResidentHistoryWorkspace(
 
           {/* Right content area */}
           <div className="flex-1 min-w-0 flex flex-col px-1 pb-2.5 pt-0.5">
-            <div className="bg-white px-1 pb-2.5 pt-0.5 flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
+            <div className="bg-white px-1 pb-2.5 pt-[5px] flex-1 min-h-0 overflow-auto" data-resident-history-scroll>
               {/* Card header with Edit / Save button */}
               <div className="flex items-center justify-between w-full pb-1.5 mb-2">
                 <h1 className="text-xl font-bold text-slate-900">
@@ -437,7 +437,7 @@ const ResidentHistoryWorkspace = forwardRef(function ResidentHistoryWorkspace(
                     onClick={handleSaveChanges}
                     className="px-4 py-2 text-sm font-medium text-white bg-[#1a73e8] hover:bg-blue-700 rounded-md transition-colors"
                   >
-                    Save Changes
+                    Save
                   </button>
                 </div>
               )}
@@ -753,12 +753,12 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
               <label className="text-xs font-medium text-slate-700 mb-0.5 block">
                 Other Specify
               </label>
-              <input
-                type="text"
+              <textarea
                 value={data.otherSpecify || ''}
                 onChange={(e) => onFieldChange('otherSpecify', e.target.value)}
                 placeholder="Requires wheelchair assistance..."
-                className={inputClass}
+                className={`${inputClass} min-h-[80px]`}
+                rows={3}
               />
             </div>
           </div>
@@ -973,10 +973,16 @@ function FamilyHistoryTab({
     const triggerRef = getTriggerRef(activeDropdown);
     if (!triggerRef.current) return;
     const rect = triggerRef.current.getBoundingClientRect();
+    const dropdownHeight = 320; // approximate max height
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+    const openUpward = spaceBelow < dropdownHeight && spaceAbove > spaceBelow;
     setDropdownRect({
-      top: rect.bottom + 4,
+      top: openUpward ? undefined : rect.bottom + 4,
+      bottom: openUpward ? window.innerHeight - rect.top + 4 : undefined,
       left: rect.left,
       width: rect.width,
+      openUpward,
     });
   }, [activeDropdown]);
 
@@ -1061,15 +1067,20 @@ function FamilyHistoryTab({
 
   const DiagnosisDropdown = ({ field }) => {
     if (activeDropdown !== field || !dropdownRect) return null;
+    const maxH = dropdownRect.openUpward
+      ? Math.min(320, dropdownRect.bottom - 8)
+      : Math.min(320, window.innerHeight - dropdownRect.top - 8);
     return createPortal(
       <div
         ref={dropdownRef}
         style={{
           top: dropdownRect.top,
+          bottom: dropdownRect.bottom,
           left: dropdownRect.left,
           width: dropdownRect.width,
+          maxHeight: maxH,
         }}
-        className="fixed z-[9999] bg-white shadow-2xl border border-slate-200 rounded-lg max-h-96 overflow-y-auto"
+        className="fixed z-[9999] bg-white shadow-2xl border border-slate-200 rounded-lg overflow-y-auto"
       >
         <div className="px-1.5 pb-1 font-medium text-slate-900">Add Diagnosis</div>
         <div className="flex gap-1 px-1.5 pb-1">
@@ -1098,7 +1109,7 @@ function FamilyHistoryTab({
             className="w-full pl-9 pr-1.5 py-1 border border-slate-200 rounded-md text-sm focus:ring-1 focus:ring-blue-500 outline-none"
           />
         </div>
-        <div className="max-h-80 overflow-y-auto">
+        <div>
           {filteredResults.map((item) => (
             <button
               key={item.id}
@@ -1116,11 +1127,17 @@ function FamilyHistoryTab({
     );
   };
 
+  const getDiagnosisName = (label) => {
+    // Strip leading ICD code prefix like "A01.3 - " and return only the name
+    const match = label.match(/^[A-Z0-9.]+ - (.+)$/);
+    return match ? match[1] : label;
+  };
+
   if (!isEditMode) {
     const rows = [
-      { familyMember: 'Siblings', nameCount: data.siblings || '—', diagnoses: formatDiagnoses(familyDiagnoses.siblings) },
-      { familyMember: 'Spouse', nameCount: data.spouse || '—', diagnoses: formatDiagnoses(familyDiagnoses.spouse) },
-      { familyMember: 'Offspring', nameCount: data.offspring || 'None recorded', diagnoses: formatDiagnoses(familyDiagnoses.offspring) },
+      { familyMember: 'Siblings', nameCount: data.siblings || '—', diagnoses: familyDiagnoses.siblings },
+      { familyMember: 'Spouse', nameCount: data.spouse || '—', diagnoses: familyDiagnoses.spouse },
+      { familyMember: 'Offspring', nameCount: data.offspring || 'None recorded', diagnoses: familyDiagnoses.offspring },
     ];
     return (
       <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
@@ -1129,20 +1146,33 @@ function FamilyHistoryTab({
             <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
               <th className="px-2.5 py-1.5 font-semibold">Family Member</th>
               <th className="px-2.5 py-1.5 font-semibold">Name / Count</th>
-              <th className="px-2.5 py-1.5 font-semibold">Diagnosis / ICD Codes</th>
+              <th className="px-2.5 py-1.5 font-semibold">Diagnosis</th>
             </tr>
           </thead>
           <tbody>
             {rows.map((row) => (
               <tr key={row.familyMember} className="border-b border-slate-200 last:border-b-0 hover:bg-slate-50/50 transition-colors">
-                <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top w-[140px]">
+                <td className="px-2.5 py-2 font-semibold text-slate-800 align-top w-[140px]">
                   {row.familyMember}
                 </td>
-                <td className="px-2.5 py-1.5 text-slate-700 align-top">
+                <td className="px-2.5 py-2 text-slate-700 align-top w-[180px]">
                   {row.nameCount}
                 </td>
-                <td className="px-2.5 py-1.5 text-slate-700">
-                  {row.diagnoses}
+                <td className="px-2.5 py-2 align-top">
+                  {row.diagnoses && row.diagnoses.length > 0 ? (
+                    <div className="flex flex-wrap gap-1.5">
+                      {row.diagnoses.map((d) => (
+                        <span
+                          key={d.id}
+                          className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-white text-slate-700 border border-slate-200"
+                        >
+                          {getDiagnosisName(d.label)}
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <span className="text-slate-400 text-sm">None reported</span>
+                  )}
                 </td>
               </tr>
             ))}
@@ -1152,122 +1182,61 @@ function FamilyHistoryTab({
     );
   }
 
+  const familyRows = [
+    { key: 'siblings', label: 'Siblings', dataField: 'siblings', placeholder: 'e.g. 2 Sisters', triggerRef: siblingsTriggerRef },
+    { key: 'spouse', label: 'Spouse', dataField: 'spouse', placeholder: 'e.g. John Smith', triggerRef: spouseTriggerRef },
+    { key: 'offspring', label: 'Offspring', dataField: 'offspring', placeholder: 'e.g. Name or count', triggerRef: offspringTriggerRef },
+  ];
+
+  const familyCellInputClass = 'w-full h-[38px] px-3 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors';
+
   return (
-    <div className="space-y-6">
-      {/* Row: Siblings */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        <div>
-          <label className={labelClass}>Siblings</label>
-          <input
-            type="text"
-            value={data.siblings}
-            onChange={(e) => onFieldChange('siblings', e.target.value)}
-            className={inputClass}
-            placeholder="e.g. 2 Sisters"
-          />
-        </div>
-        <div className="relative">
-          <FieldLabel>Diagnosis / ICD Codes</FieldLabel>
-          <div className="space-y-2">
-            <DiagnosisChips diagnoses={familyDiagnoses.siblings} field="siblings" />
-            <div className="relative w-full" ref={siblingsTriggerRef}>
-              <input
-                data-add-diagnosis-trigger
-                type="text"
-                readOnly
-                placeholder="Add Diagnosis..."
-                onClick={() => setActiveDropdown(activeDropdown === 'siblings' ? null : 'siblings')}
-                className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-              />
-              <DiagnosisDropdown field="siblings" />
-            </div>
-          </div>
-        </div>
-      </div>
-      {/* Row: Spouse */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        <div>
-          <label className={labelClass}>Spouse</label>
-          {isEditMode ? (
-            <input
-              type="text"
-              value={data.spouse}
-              onChange={(e) => onFieldChange('spouse', e.target.value)}
-              className={inputClass}
-              placeholder="e.g. John Smith"
-            />
-          ) : (
-            <FieldValue>{data.spouse}</FieldValue>
-          )}
-        </div>
-        <div className="relative">
-          <FieldLabel>Diagnosis / ICD Codes</FieldLabel>
-          {!isEditMode ? (
-            <FieldValue>
-              {familyDiagnoses.spouse.length > 0
-                ? familyDiagnoses.spouse.map((d) => d.label).join(', ')
-                : 'None reported'}
-            </FieldValue>
-          ) : (
-            <div className="space-y-2">
-              <DiagnosisChips diagnoses={familyDiagnoses.spouse} field="spouse" />
-              <div className="relative w-full" ref={spouseTriggerRef}>
+    <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+            <th className="px-2.5 py-1.5 font-semibold w-[140px]">Family Member</th>
+            <th className="px-2.5 py-1.5 font-semibold w-[220px]">Name / Count</th>
+            <th className="px-2.5 py-1.5 font-semibold">Diagnosis / ICD Codes</th>
+          </tr>
+        </thead>
+        <tbody>
+          {familyRows.map((row) => (
+            <tr key={row.key} className="border-b border-slate-200 last:border-b-0">
+              <td className="px-2.5 font-semibold text-slate-800 align-middle h-[54px]">
+                {row.label}
+              </td>
+              <td className="p-0 align-middle">
                 <input
-                  data-add-diagnosis-trigger
                   type="text"
-                  readOnly
-                  placeholder="Add Diagnosis..."
-                  onClick={() => setActiveDropdown(activeDropdown === 'spouse' ? null : 'spouse')}
-                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+                  value={data[row.dataField]}
+                  onChange={(e) => onFieldChange(row.dataField, e.target.value)}
+                  placeholder={row.placeholder}
+                  className={familyCellInputClass}
                 />
-                <DiagnosisDropdown field="spouse" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      {/* Row: Offspring */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        <div>
-          <label className={labelClass}>Offspring</label>
-          {isEditMode ? (
-            <input
-              type="text"
-              value={data.offspring}
-              onChange={(e) => onFieldChange('offspring', e.target.value)}
-              className={inputClass}
-              placeholder="e.g. Name or count"
-            />
-          ) : (
-            <FieldValue>{data.offspring || 'None recorded'}</FieldValue>
-          )}
-        </div>
-        <div className="relative">
-          <FieldLabel>Diagnosis / ICD Codes</FieldLabel>
-          {!isEditMode ? (
-            <FieldValue>
-              {familyDiagnoses.offspring.length > 0
-                ? familyDiagnoses.offspring.map((d) => d.label).join(', ')
-                : 'None reported'}
-            </FieldValue>
-          ) : (
-            <div className="space-y-2">
-              <DiagnosisChips diagnoses={familyDiagnoses.offspring} field="offspring" />
-              <div className="relative w-full" ref={offspringTriggerRef}>
-                <input
-                  data-add-diagnosis-trigger
-                  type="text"
-                  readOnly
-                  placeholder="Add Diagnosis..."
-                  onClick={() => setActiveDropdown(activeDropdown === 'offspring' ? null : 'offspring')}
-                  className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
-                />
-                <DiagnosisDropdown field="offspring" />
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
+              </td>
+              <td className="px-2.5 py-2 align-middle">
+                <div className="flex flex-col gap-1.5">
+                  {familyDiagnoses[row.key]?.length > 0 && (
+                    <DiagnosisChips diagnoses={familyDiagnoses[row.key]} field={row.key} />
+                  )}
+                  <div className="relative w-full" ref={row.triggerRef}>
+                    <input
+                      data-add-diagnosis-trigger
+                      type="text"
+                      readOnly
+                      placeholder="Add Diagnosis..."
+                      onClick={() => setActiveDropdown(activeDropdown === row.key ? null : row.key)}
+                      className={`${inputClass} cursor-pointer placeholder:text-slate-400 focus:border-blue-500 focus:ring-1 focus:ring-blue-500`}
+                    />
+                    <DiagnosisDropdown field={row.key} />
+                  </div>
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
@@ -1445,15 +1414,25 @@ function LifestyleTab({
             })}
           </div>
 
-          <div className="mt-3 space-y-2">
-            <div>
-              <div className="text-sm font-bold text-slate-700">Sleep Patterns</div>
-              <div className="text-sm text-slate-600">{data.sleepPatterns || '—'}</div>
-            </div>
-            <div>
-              <div className="text-sm font-bold text-slate-700">Seatbelt Use</div>
-              <div className="text-sm text-slate-600">{data.seatbeltUse || '—'}</div>
-            </div>
+          <div className="mt-3 w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+                  <th className="px-2.5 py-1.5 font-semibold w-[200px]">Factor</th>
+                  <th className="px-2.5 py-1.5 font-semibold">Details</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr className="border-b border-slate-200">
+                  <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Sleep Patterns</td>
+                  <td className="px-2.5 py-1.5 text-slate-700">{data.sleepPatterns || '—'}</td>
+                </tr>
+                <tr>
+                  <td className="px-2.5 py-1.5 font-semibold text-slate-800 align-top">Seatbelt Use</td>
+                  <td className="px-2.5 py-1.5 text-slate-700">{data.seatbeltUse || '—'}</td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </>
       ) : (
@@ -1621,32 +1600,45 @@ function LifestyleTab({
           {/* Section 3: Other Factors */}
           <section>
             <h3 className={LIFESTYLE_SECTION_HEADER}>Other Factors</h3>
-            <div className="grid grid-cols-4 gap-4 items-start">
-              <div className="text-sm font-semibold text-slate-700 pt-2">
-                Sleep Patterns
-              </div>
-              <div className="col-span-3">
-                <textarea
-                  value={data.sleepPatterns ?? ''}
-                  onChange={(e) => onFieldChange('sleepPatterns', e.target.value)}
-                  placeholder="Describe typical sleep duration and quality..."
-                  className={`${compactInputClass} resize-y`}
-                  rows={2}
-                />
-              </div>
-
-              <div className="text-sm font-semibold text-slate-700 pt-2">
-                Seatbelt Use
-              </div>
-              <div className="col-span-3">
-                <input
-                  type="text"
-                  value={data.seatbeltUse ?? ''}
-                  onChange={(e) => onFieldChange('seatbeltUse', e.target.value)}
-                  placeholder="Always wears seatbelt"
-                  className={compactInputClass}
-                />
-              </div>
+            <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+              <table className="w-full text-sm">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+                    <th className="px-2.5 py-1.5 font-semibold w-[200px]">Factor</th>
+                    <th className="px-2.5 py-1.5 font-semibold">Details</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr className="border-b border-slate-200">
+                    <td className="px-2.5 font-semibold text-slate-800 align-middle w-[200px]">
+                      Sleep Patterns
+                    </td>
+                    <td className="p-0 align-top">
+                      <textarea
+                        value={data.sleepPatterns ?? ''}
+                        onChange={(e) => onFieldChange('sleepPatterns', e.target.value)}
+                        placeholder="Describe typical sleep duration and quality..."
+                        className="w-full px-3 py-2 bg-transparent border-none outline-none text-sm text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors resize-none"
+                        rows={2}
+                      />
+                    </td>
+                  </tr>
+                  <tr>
+                    <td className="px-2.5 font-semibold text-slate-800 align-middle w-[200px]">
+                      Seatbelt Use
+                    </td>
+                    <td className="p-0 align-middle">
+                      <input
+                        type="text"
+                        value={data.seatbeltUse ?? ''}
+                        onChange={(e) => onFieldChange('seatbeltUse', e.target.value)}
+                        placeholder="Always wears seatbelt"
+                        className="w-full h-[44px] px-3 bg-transparent border-none outline-none text-sm text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors"
+                      />
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </section>
         </>
@@ -1658,79 +1650,90 @@ function LifestyleTab({
 const OTHER_TAB_LABEL = 'text-[11px] font-bold text-slate-500 tracking-wider mb-0.5 block';
 const OTHER_TAB_INPUT = 'w-full border border-slate-200 rounded-md p-1 text-sm focus:ring-1 focus:ring-blue-500 focus:border-blue-500 outline-none';
 
+const cellBase = 'w-full bg-transparent border-none outline-none text-sm text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors';
+
+const OTHER_GROUPS = [
+  [{ label: 'Name 1', field: 'name1', placeholder: 'Enter name…' }, { label: 'Value 1', field: 'value1', placeholder: 'Enter value…' }],
+  [{ label: 'Name 2', field: 'name2', placeholder: 'Enter name…' }, { label: 'Value 2', field: 'value2', placeholder: 'Enter value…' }],
+];
+
+function OtherMiniTable({ fields, data, isEditMode, onFieldChange }) {
+  return (
+    <div className="flex-1 overflow-hidden rounded-lg bg-white border border-slate-200">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+            <th className="px-2.5 py-1.5 font-semibold w-[90px]">Field</th>
+            <th className="px-2.5 py-1.5 font-semibold">Value</th>
+          </tr>
+        </thead>
+        <tbody>
+          {fields.map((row, i) => (
+            <tr key={row.field} className={i < fields.length - 1 ? 'border-b border-slate-200' : ''}>
+              <td className="px-2.5 font-semibold text-slate-800 align-middle h-[44px]">
+                {row.label}
+              </td>
+              <td className="p-0 align-middle">
+                {isEditMode ? (
+                  <input
+                    type="text"
+                    value={data[row.field] ?? ''}
+                    onChange={(e) => onFieldChange(row.field, e.target.value)}
+                    placeholder={row.placeholder}
+                    className={`${cellBase} h-[44px] px-3`}
+                  />
+                ) : (
+                  <span className="px-2.5 text-slate-700">{data[row.field] || '—'}</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function OtherTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue }) {
   return (
-    <div className="space-y-6">
-      {/* Row 1: Name/Value pairs - two columns */}
-      <div className="grid grid-cols-2 gap-x-4 gap-y-2">
-        <div>
-          <label className={OTHER_TAB_LABEL}>Name/Value:</label>
-          {isEditMode ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={data.name1 ?? ''}
-                onChange={(e) => onFieldChange('name1', e.target.value)}
-                placeholder="Name 1"
-                className={OTHER_TAB_INPUT}
-              />
-              <input
-                type="text"
-                value={data.value1 ?? ''}
-                onChange={(e) => onFieldChange('value1', e.target.value)}
-                placeholder="Value 1"
-                className={OTHER_TAB_INPUT}
-              />
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <FieldValue>{data.name1 || '—'}</FieldValue>
-              <FieldValue>{data.value1 || '—'}</FieldValue>
-            </div>
-          )}
-        </div>
-        <div>
-          <label className={OTHER_TAB_LABEL}>Name/Value:</label>
-          {isEditMode ? (
-            <div className="space-y-2">
-              <input
-                type="text"
-                value={data.name2 ?? ''}
-                onChange={(e) => onFieldChange('name2', e.target.value)}
-                placeholder="Name 2"
-                className={OTHER_TAB_INPUT}
-              />
-              <input
-                type="text"
-                value={data.value2 ?? ''}
-                onChange={(e) => onFieldChange('value2', e.target.value)}
-                placeholder="Value 2"
-                className={OTHER_TAB_INPUT}
-              />
-            </div>
-          ) : (
-            <div className="space-y-1">
-              <FieldValue>{data.name2 || '—'}</FieldValue>
-              <FieldValue>{data.value2 || '—'}</FieldValue>
-            </div>
-          )}
-        </div>
+    <div className="space-y-4">
+      {/* Two side-by-side Name/Value tables */}
+      <div className="flex gap-4">
+        {OTHER_GROUPS.map((fields, i) => (
+          <OtherMiniTable key={i} fields={fields} data={data} isEditMode={isEditMode} onFieldChange={onFieldChange} />
+        ))}
       </div>
 
-      {/* Row 2: Additional History */}
-      <div>
-        <label className={OTHER_TAB_LABEL}>Additional History:</label>
-        {isEditMode ? (
-          <textarea
-            value={data.additionalHistory ?? ''}
-            onChange={(e) => onFieldChange('additionalHistory', e.target.value)}
-            className={`${OTHER_TAB_INPUT} min-h-[100px] resize-y`}
-            rows={4}
-            placeholder="Additional history..."
-          />
-        ) : (
-          <FieldValue>{data.additionalHistory || '—'}</FieldValue>
-        )}
+      {/* Additional History table */}
+      <div className="w-full overflow-hidden rounded-lg bg-white border border-slate-200">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
+              <th className="px-2.5 py-1.5 font-semibold w-[200px]">Field</th>
+              <th className="px-2.5 py-1.5 font-semibold">Details</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td className="px-2.5 font-semibold text-slate-800 align-top pt-2.5">
+                Additional History
+              </td>
+              <td className="p-0 align-top">
+                {isEditMode ? (
+                  <textarea
+                    value={data.additionalHistory ?? ''}
+                    onChange={(e) => onFieldChange('additionalHistory', e.target.value)}
+                    placeholder="Additional history..."
+                    className={`${cellBase} px-3 py-2 resize-none min-h-[100px]`}
+                    rows={4}
+                  />
+                ) : (
+                  <span className="block px-2.5 py-2 text-slate-700">{data.additionalHistory || '—'}</span>
+                )}
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
     </div>
   );
