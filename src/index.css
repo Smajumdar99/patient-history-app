@@ -20,3 +20,14 @@ body {
   margin: 0;
   cursor: pointer;
 }
+
+.date-input-compact::-webkit-datetime-edit-fields-wrapper {
+  text-transform: uppercase;
+}
+
+.date-input-compact::-webkit-datetime-edit-day-field,
+.date-input-compact::-webkit-datetime-edit-month-field,
+.date-input-compact::-webkit-datetime-edit-year-field,
+.date-input-compact::-webkit-datetime-edit-text {
+  text-transform: uppercase;
+}

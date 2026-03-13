@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, forwardRef, useImperativeHandle } from 'react';
 import { createPortal } from 'react-dom';
 import {
   Pencil,
@@ -216,20 +216,19 @@ const INITIAL_MOCK_DATA = {
   },
 };
 
-export default function ResidentHistoryWorkspace({ embedded = false }) {
+const ResidentHistoryWorkspace = forwardRef(function ResidentHistoryWorkspace(
+  { embedded = false, onEditModeChange },
+  ref
+) {
   const [activeTab, setActiveTab] = useState(0);
   const [isEditMode, setIsEditMode] = useState(false);
   const [mockData, setMockData] = useState(INITIAL_MOCK_DATA);
 
-  const handleFieldChange = (section, field, value) => {
-    setMockData((prev) => ({
-      ...prev,
-      [section]: {
-        ...prev[section],
-        [field]: value,
-      },
-    }));
-  };
+  useEffect(() => {
+    if (typeof onEditModeChange === 'function') {
+      onEditModeChange(isEditMode);
+    }
+  }, [isEditMode, onEditModeChange]);
 
   const handleSaveChanges = () => {
     setMockData((prev) => {
@@ -271,6 +270,21 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
 
   const handleCancel = () => {
     setIsEditMode(false);
+  };
+
+  useImperativeHandle(ref, () => ({
+    save: handleSaveChanges,
+    cancel: handleCancel,
+  }));
+
+  const handleFieldChange = (section, field, value) => {
+    setMockData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [field]: value,
+      },
+    }));
   };
 
   const FieldLabel = ({ children }) => (
@@ -407,26 +421,27 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
                   FieldValue={FieldValue}
                 />
               )}
-            </div>
 
-            {isEditMode && (
-              <footer className="shrink-0 px-6 py-4 flex items-center justify-end gap-3 bg-slate-50">
-                <button
-                  type="button"
-                  onClick={handleCancel}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-100 transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="button"
-                  onClick={handleSaveChanges}
-                  className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-[#0056B3] rounded-md hover:bg-[#004494] transition-colors"
-                >
-                  Save
-                </button>
-              </footer>
-            )}
+              {/* Inline actions at bottom of scrollable content */}
+              {isEditMode && (
+                <div className="mt-4 pt-3 flex justify-end gap-3 pb-6">
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleSaveChanges}
+                    className="px-4 py-2 text-sm font-medium text-white bg-[#1a73e8] hover:bg-blue-700 rounded-md transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
     </div>
@@ -440,7 +455,9 @@ export default function ResidentHistoryWorkspace({ embedded = false }) {
       {cardContent}
     </div>
   );
-}
+});
+
+export default ResidentHistoryWorkspace;
 
 // --- Tab content components ---
 
@@ -586,7 +603,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                   <div className="grid grid-cols-12 gap-1.5 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
                     <div className="col-span-4">Exam Name</div>
                     <div className="col-span-3">Status</div>
-                    <div className="col-span-5">Date / Notes</div>
+                    <div className="col-span-5 pl-2">Date / Notes</div>
                   </div>
                   {list.map((exam) => {
                     const statusRaw =
@@ -629,10 +646,10 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
           </div>
         ) : (
           <div className="w-full">
-            <div className="grid grid-cols-12 gap-2 bg-slate-50 border-b border-slate-200 px-2.5 py-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
+            <div className="grid grid-cols-12 gap-1 bg-slate-50 border-b border-slate-200 px-2 py-1 text-[11px] font-semibold uppercase tracking-wider text-slate-700 items-center">
               <div className="col-span-3">Exam Name</div>
               <div className="col-span-4">Status</div>
-              <div className="col-span-5">Date / Notes</div>
+              <div className="col-span-5 pl-2">Date / Notes</div>
             </div>
             <div>
               {EXAMS_AND_TESTS_DEFINITION.map((def) => {
@@ -643,43 +660,43 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                 return (
                   <div
                     key={def.examName}
-                    className="grid grid-cols-12 gap-2 items-stretch border-b border-slate-200 last:border-b-0"
+                    className="grid grid-cols-12 gap-1 items-center border-b border-slate-200 last:border-b-0"
                   >
-                    <div className="col-span-3 px-2.5 py-2 flex items-center">
-                      <span className="text-sm font-semibold text-slate-800">
+                    <div className="col-span-3 px-2 py-1 flex items-center">
+                      <span className="text-[13px] font-semibold text-slate-800">
                         {def.examName}
                       </span>
                     </div>
-                    <div className="col-span-4 px-2.5 py-2 flex items-center">
-                      <div className="inline-flex bg-slate-100 rounded-md p-0.5 space-x-0.5">
+                    <div className="col-span-4 px-1.5 py-1 flex items-center">
+                      <div className="flex w-full p-0.5 bg-slate-50 border border-slate-200 rounded-lg">
                         {EXAM_STATUS_OPTIONS.map((statusOption) => {
                           const isActive = current.status === statusOption;
-                          const activeClass =
-                            statusOption === 'N/A'
-                              ? 'bg-slate-500 text-white shadow-sm'
-                              : statusOption === 'Normal'
-                                ? 'bg-teal-600 text-white shadow-sm'
-                                : 'bg-red-600 text-white shadow-sm';
+                          const activeTextClass =
+                            statusOption === 'Normal'
+                              ? 'text-emerald-600'
+                              : statusOption === 'Abnormal'
+                                ? 'text-red-600'
+                                : 'text-blue-600';
                           return (
                             <button
-                            key={statusOption}
-                            type="button"
-                            onClick={() =>
-                              updateExam(def.examName, 'status', statusOption)
-                            }
-                            className={`px-1.5 py-0.5 rounded-md text-sm font-medium ${
-                              isActive
-                                ? activeClass
-                                : 'text-slate-500 hover:text-slate-700'
-                            }`}
-                          >
+                              key={statusOption}
+                              type="button"
+                              onClick={() =>
+                                updateExam(def.examName, 'status', statusOption)
+                              }
+                              className={`flex-1 text-center py-1 text-xs font-medium transition-all duration-200 ${
+                                isActive
+                                  ? `bg-white shadow-sm rounded-md border border-slate-100 ${activeTextClass}`
+                                  : 'text-slate-500 hover:text-slate-700 bg-transparent'
+                              }`}
+                            >
                               {statusOption}
                             </button>
                           );
                         })}
                       </div>
                     </div>
-                    <div className="col-span-5 p-0 flex items-stretch">
+                    <div className="col-span-5 p-0 flex items-center">
                       <input
                         type="text"
                         value={current.notes}
@@ -687,7 +704,7 @@ function GeneralTab({ data, isEditMode, onFieldChange, FieldLabel, FieldValue })
                           updateExam(def.examName, 'notes', e.target.value)
                         }
                         placeholder="MM/DD/YYYY or Notes"
-                        className="w-full h-full min-h-[44px] px-3 py-2 bg-transparent border-none outline-none rounded-none text-sm text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors"
+                        className="w-full h-[34px] px-2 py-1 bg-transparent border-none outline-none rounded-none text-[13px] text-slate-700 placeholder:text-slate-400 hover:bg-slate-50 focus:bg-blue-50/50 focus:ring-inset focus:ring-1 focus:ring-blue-500 transition-colors"
                       />
                     </div>
                   </div>
@@ -1347,12 +1364,12 @@ function LifestyleTab({
   FieldValue,
 }) {
   const compactInputClass =
-    'w-full text-sm px-3 py-2 bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
-  const compactDateInputClass =
+    'w-full h-[36px] text-sm px-3 bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
+  const compactDateInputBase =
     'date-input-compact w-[150px] h-[36px] pl-3 pr-8 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
 
   const SegmentedToggle = ({ field, options }) => (
-    <div className="w-full inline-flex bg-slate-50 border border-slate-100 rounded-md p-0.5 box-border">
+    <div className="flex w-full h-[36px] p-0.5 bg-slate-50 border border-slate-200 rounded-lg items-center">
       {options.map((opt) => {
         const active = (data[field] || '') === opt;
         return (
@@ -1360,10 +1377,10 @@ function LifestyleTab({
             key={opt}
             type="button"
             onClick={() => onFieldChange(field, opt)}
-            className={`flex-1 py-0.5 px-1 text-xs rounded-md transition-colors font-medium ${
+            className={`flex-1 h-[28px] text-center text-xs font-medium transition-all duration-200 flex items-center justify-center ${
               active
-                ? 'bg-white shadow-sm text-blue-600'
-                : 'text-slate-500 hover:text-slate-700'
+                ? 'bg-white text-blue-600 shadow-sm rounded-md border border-slate-100'
+                : 'text-slate-500 hover:text-slate-700 bg-transparent'
             }`}
           >
             {opt}
@@ -1583,7 +1600,7 @@ function LifestyleTab({
                         onFieldChange(row.startField, e.target.value)
                       }
                       title={row.startTitle || 'Start Date'}
-                      className={compactDateInputClass}
+                      className={`${compactDateInputBase} ${data[row.startField] ? 'text-slate-900' : 'text-slate-400'}`}
                     />
                     <span className="text-slate-400">-</span>
                     <input
@@ -1593,7 +1610,7 @@ function LifestyleTab({
                         onFieldChange(row.endField, e.target.value)
                       }
                       title="End Date"
-                      className={compactDateInputClass}
+                      className={`${compactDateInputBase} ${data[row.endField] ? 'text-slate-900' : 'text-slate-400'}`}
                     />
                   </div>
                 </div>
