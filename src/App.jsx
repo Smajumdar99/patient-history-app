@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import {
   LayoutDashboard,
   Search,
@@ -102,8 +102,6 @@ function App() {
   const [sidebarExpanded, setSidebarExpanded] = useState(true);
   const [activeNav, setActiveNav] = useState('Clients');
   const [sidebarSearch, setSidebarSearch] = useState('');
-  const [isResidentHistoryEditMode, setIsResidentHistoryEditMode] = useState(false);
-  const residentHistoryRef = useRef(null);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden bg-[#F4F6F9]">
@@ -344,36 +342,11 @@ function App() {
                 </nav>
               </div>
 
-              {/* Right: action buttons (Save/Cancel when editing Resident History) */}
-              <div className="flex items-center gap-3">
-                {isResidentHistoryEditMode && (
-                  <>
-                    <button
-                      type="button"
-                      onClick={() => residentHistoryRef.current?.cancel()}
-                      className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => residentHistoryRef.current?.save()}
-                      className="px-4 py-2 text-sm font-medium text-white bg-[#1a73e8] hover:bg-blue-700 rounded-md transition-colors"
-                    >
-                      Save
-                    </button>
-                  </>
-                )}
-              </div>
             </div>
           </div>
 
           <div className="flex-1 p-2 pt-2 min-h-0 flex flex-col">
-            <ResidentHistoryWorkspace
-              ref={residentHistoryRef}
-              embedded
-              onEditModeChange={setIsResidentHistoryEditMode}
-            />
+            <ResidentHistoryWorkspace embedded />
           </div>
         </main>
       </div>

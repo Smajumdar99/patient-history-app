@@ -6,6 +6,7 @@ import {
   Search,
   ChevronDown,
   Users,
+  Calendar,
 } from 'lucide-react';
 
 /** General tab icon (user-regular style) */
@@ -421,27 +422,27 @@ const ResidentHistoryWorkspace = forwardRef(function ResidentHistoryWorkspace(
                   FieldValue={FieldValue}
                 />
               )}
-
-              {/* Inline actions at bottom of scrollable content */}
-              {isEditMode && (
-                <div className="mt-4 pt-3 flex justify-end gap-3 pb-6">
-                  <button
-                    type="button"
-                    onClick={handleCancel}
-                    className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleSaveChanges}
-                    className="px-4 py-2 text-sm font-medium text-white bg-[#1a73e8] hover:bg-blue-700 rounded-md transition-colors"
-                  >
-                    Save
-                  </button>
-                </div>
-              )}
             </div>
+
+            {/* Static footer: Cancel and Save visible for all tabs when editing */}
+            {isEditMode && (
+              <div className="shrink-0 mt-2 pt-3 border-t border-slate-200 flex justify-end gap-3 pb-2">
+                <button
+                  type="button"
+                  onClick={handleCancel}
+                  className="px-4 py-2 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-md hover:bg-slate-50 transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={handleSaveChanges}
+                  className="px-4 py-2 text-sm font-medium text-white bg-[#1a73e8] hover:bg-blue-700 rounded-md transition-colors"
+                >
+                  Save
+                </button>
+              </div>
+            )}
           </div>
         </div>
     </div>
@@ -1127,12 +1128,6 @@ function FamilyHistoryTab({
     );
   };
 
-  const getDiagnosisName = (label) => {
-    // Strip leading ICD code prefix like "A01.3 - " and return only the name
-    const match = label.match(/^[A-Z0-9.]+ - (.+)$/);
-    return match ? match[1] : label;
-  };
-
   if (!isEditMode) {
     const rows = [
       { familyMember: 'Siblings', nameCount: data.siblings || '—', diagnoses: familyDiagnoses.siblings },
@@ -1146,7 +1141,7 @@ function FamilyHistoryTab({
             <tr className="bg-slate-50 border-b border-slate-200 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-700">
               <th className="px-2.5 py-1.5 font-semibold">Family Member</th>
               <th className="px-2.5 py-1.5 font-semibold">Name / Count</th>
-              <th className="px-2.5 py-1.5 font-semibold">Diagnosis</th>
+              <th className="px-2.5 py-1.5 font-semibold">Diagnosis / ICD Codes</th>
             </tr>
           </thead>
           <tbody>
@@ -1166,7 +1161,7 @@ function FamilyHistoryTab({
                           key={d.id}
                           className="inline-flex items-center px-2 py-0.5 rounded-full text-sm font-medium bg-white text-slate-700 border border-slate-200"
                         >
-                          {getDiagnosisName(d.label)}
+                          {d.label}
                         </span>
                       ))}
                     </div>
@@ -1332,10 +1327,43 @@ function LifestyleTab({
   FieldLabel,
   FieldValue,
 }) {
+  const [datePickerFor, setDatePickerFor] = useState(null);
+  const dateInputRef = useRef(null);
+
   const compactInputClass =
     'w-full h-[36px] text-sm px-3 bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
-  const compactDateInputBase =
-    'date-input-compact w-[150px] h-[36px] pl-3 pr-8 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none';
+  const compactDateInputClass =
+    'w-[150px] h-[36px] pl-3 pr-3 text-sm bg-white border border-slate-200 rounded-md focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none placeholder:text-slate-400';
+  const toDisplayDate = (v) => {
+    if (!v) return '';
+    const match = String(v).match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    return match ? `${match[2]}-${match[3]}-${match[1]}` : v;
+  };
+  const toStoredDate = (v) => {
+    if (!v) return '';
+    const trimmed = String(v).trim();
+    const match = trimmed.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/) || trimmed.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+    if (match) {
+      if (match[1].length === 4) return `${match[1]}-${match[2].padStart(2, '0')}-${match[3].padStart(2, '0')}`;
+      return `${match[3]}-${match[1].padStart(2, '0')}-${match[2].padStart(2, '0')}`;
+    }
+    return trimmed;
+  };
+
+  const openCalendar = (field) => {
+    setDatePickerFor(field);
+  };
+
+  useEffect(() => {
+    if (!datePickerFor || !dateInputRef.current) return;
+    const input = dateInputRef.current;
+    const open = () => {
+      if (typeof input.showPicker === 'function') input.showPicker();
+      else input.click();
+    };
+    const t = setTimeout(open, 0);
+    return () => clearTimeout(t);
+  }, [datePickerFor]);
 
   const SegmentedToggle = ({ field, options }) => (
     <div className="flex w-full h-[36px] p-0.5 bg-slate-50 border border-slate-200 rounded-lg items-center">
@@ -1437,6 +1465,26 @@ function LifestyleTab({
         </>
       ) : (
         <>
+          {/* Hidden native date input for calendar picker */}
+          <input
+            ref={dateInputRef}
+            type="date"
+            value={datePickerFor ? ((() => {
+              const v = data[datePickerFor] || '';
+              if (/^\d{4}-\d{2}-\d{2}$/.test(v)) return v;
+              const s = toStoredDate(v);
+              return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : '';
+            })()) : ''}
+            onChange={(e) => {
+              if (datePickerFor) {
+                onFieldChange(datePickerFor, e.target.value);
+                setDatePickerFor(null);
+              }
+            }}
+            onBlur={() => setDatePickerFor(null)}
+            className="fixed left-[-9999px] w-1 h-1 opacity-0"
+            aria-hidden
+          />
           {/* Single continuous list: Substance Use + Wellness (no gap between Coffee and Counseling) */}
           <section className="mb-0">
             <h3 className={LIFESTYLE_SECTION_HEADER}>Substance Use History</h3>
@@ -1572,25 +1620,49 @@ function LifestyleTab({
                 )}
                 <div className="col-span-4">
                   <div className="flex items-center space-x-2 w-full">
-                    <input
-                      type="date"
-                      value={data[row.startField] || ''}
-                      onChange={(e) =>
-                        onFieldChange(row.startField, e.target.value)
-                      }
-                      title={row.startTitle || 'Start Date'}
-                      className={`${compactDateInputBase} ${data[row.startField] ? 'text-slate-900' : 'text-slate-400'}`}
-                    />
-                    <span className="text-slate-400">-</span>
-                    <input
-                      type="date"
-                      value={data[row.endField] || ''}
-                      onChange={(e) =>
-                        onFieldChange(row.endField, e.target.value)
-                      }
-                      title="End Date"
-                      className={`${compactDateInputBase} ${data[row.endField] ? 'text-slate-900' : 'text-slate-400'}`}
-                    />
+                    <div className="relative flex-1 min-w-0 max-w-[180px]">
+                      <input
+                        type="text"
+                        value={toDisplayDate(data[row.startField]) || data[row.startField] || ''}
+                        onChange={(e) =>
+                          onFieldChange(row.startField, e.target.value ? toStoredDate(e.target.value) : '')
+                        }
+                        placeholder="MM-DD-YYYY"
+                        title={row.startTitle || 'Start Date (MM-DD-YYYY)'}
+                        className={`${compactDateInputClass} w-full pr-9 ${data[row.startField] ? 'text-slate-900' : 'text-slate-400'}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => openCalendar(row.startField)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded"
+                        title="Pick date"
+                        aria-label="Open calendar"
+                      >
+                        <Calendar className="w-4 h-4" />
+                      </button>
+                    </div>
+                    <span className="text-slate-400 shrink-0">-</span>
+                    <div className="relative flex-1 min-w-0 max-w-[180px]">
+                      <input
+                        type="text"
+                        value={toDisplayDate(data[row.endField]) || data[row.endField] || ''}
+                        onChange={(e) =>
+                          onFieldChange(row.endField, e.target.value ? toStoredDate(e.target.value) : '')
+                        }
+                        placeholder="MM-DD-YYYY"
+                        title="End Date (MM-DD-YYYY)"
+                        className={`${compactDateInputClass} w-full pr-9 ${data[row.endField] ? 'text-slate-900' : 'text-slate-400'}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => openCalendar(row.endField)}
+                        className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-600 rounded"
+                        title="Pick date"
+                        aria-label="Open calendar"
+                      >
+                        <Calendar className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
